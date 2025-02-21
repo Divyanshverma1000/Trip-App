@@ -1,0 +1,17 @@
+# Exclude node modules (EAS will install dependencies using package.json)
+node_modules/
+
+# Exclude git files and directories
+.git/
+.gitignore
+
+# Exclude local environment files
+*.env
+
+# Exclude build outputs and caches
+.expo/
+expo-debug.log*
+
+# Exclude local build directories if present
+/android
+/ios

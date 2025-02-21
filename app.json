@@ -15,15 +15,14 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.anonymous.wander"
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router",
       [
         "expo-splash-screen",
         {
@@ -34,8 +33,12 @@
         }
       ]
     ],
-    "experiments": {
-      "typedRoutes": true
+    "experiments": {},
+    "extra": {
+      "API_BASE_URL": "http://localhost:5000/api",
+      "eas": {
+        "projectId": "f8031d21-5772-4ead-9a37-8687b2a0be49"
+      }
     }
   }
 }
