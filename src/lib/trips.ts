@@ -255,3 +255,21 @@ export const getMyTrips = async (): Promise<Trip[]> => {
     throw error;
   }
 };
+
+export const joinTrip = async (tripId: string): Promise<{ message: string; trip?: any }> => {
+  try {
+    const response = await axios.post(`/trips/${tripId}/join`);
+    Toast.show({
+      type: 'success',
+      text1: 'Successfully joined the trip',
+    });
+    return response.data;
+  } catch (error: any) {
+    Toast.show({
+      type: 'error',
+      text1: 'Failed to join trip',
+      text2: error.response?.data?.error || error.message,
+    });
+    throw error;
+  }
+};

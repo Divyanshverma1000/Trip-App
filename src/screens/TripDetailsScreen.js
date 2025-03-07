@@ -8,15 +8,15 @@ import {
   Platform,
   ScrollView,
   TouchableOpacity,
-  Dimensions,
-  Pressable,
+  Alert,
 } from 'react-native';
-import Animated, { useSharedValue, FadeInUp, withSpring } from 'react-native-reanimated';
+import Animated, { useSharedValue, FadeInUp } from 'react-native-reanimated';
 import { useRoute } from '@react-navigation/native';
-import { getTrip } from '../lib/trips';
+import { getTrip, joinTrip as joinTripApi } from '../lib/trips';
 import { TripHeader } from '../components/TripHeader';
 import { TripTag } from '../components/TripTag';
 import { MaterialIcons } from '@expo/vector-icons';
+import { getStorageItem } from '../lib/storage';
 
 const TripDetailsScreen = () => {
   const route = useRoute();
@@ -24,8 +24,24 @@ const TripDetailsScreen = () => {
   const [trip, setTrip] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expandedDay, setExpandedDay] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [joining, setJoining] = useState(false);
   const scrollY = useSharedValue(0);
 
+  // Fetch current user ID from storage when component mounts
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      try {
+        const currentUserId = await getStorageItem('userId');
+        setUserId(currentUserId);
+      } catch (error) {
+        console.error('Error fetching user ID:', error);
+      }
+    };
+    getCurrentUser();
+  }, []);
+
+  // Fetch trip details when tripId changes
   useEffect(() => {
     if (tripId) {
       setLoading(true);
@@ -43,6 +59,31 @@ const TripDetailsScreen = () => {
     }
   }, [tripId]);
 
+  // Determine if the user is already a member of this trip (with accepted status)
+  const isMember = trip?.members?.some(
+    (member) => member.user.toString() === userId && member.status === "accepted"
+  );
+
+  const joinTrip = async (tripId) => {
+    if (joining) return; // Prevent multiple clicks
+    try {
+      setJoining(true);
+      // Call the axios-based API function from lib/trips.ts
+      await joinTripApi(tripId);
+      // Refresh trip details after successful join
+      const updatedTrip = await getTrip(tripId);
+      setTrip(updatedTrip);
+    } catch (error) {
+      Alert.alert('Join Failed', error.message || 'Unable to join the trip. Please try again later.');
+    } finally {
+      setJoining(false);
+    }
+  };
+
+  const toggleDayExpansion = (dayIndex) => {
+    setExpandedDay(expandedDay === dayIndex ? null : dayIndex);
+  };
+
   if (!tripId || loading || !trip) {
     return (
       <View style={styles.centered}>
@@ -56,10 +97,6 @@ const TripDetailsScreen = () => {
       </View>
     );
   }
-
-  const toggleDayExpansion = (dayIndex) => {
-    setExpandedDay(expandedDay === dayIndex ? null : dayIndex);
-  };
 
   return (
     <View style={styles.container}>
@@ -96,6 +133,36 @@ const TripDetailsScreen = () => {
                 </View>
               </View>
             </View>
+          )}
+
+          {/* Join Button Section */}
+          {trip.isPublic && (
+            <>
+              {!isMember ? (
+                <TouchableOpacity 
+                  style={[styles.joinButton, joining && styles.joinButtonDisabled]}
+                  onPress={() => joinTrip(trip._id)}
+                  disabled={joining}
+                >
+                  {joining ? (
+                    <ActivityIndicator size="small" color="#FFF" />
+                  ) : (
+                    <>
+                      <MaterialIcons name="group-add" size={24} color="#FFF" />
+                      <Text style={styles.joinButtonText}>Join This Trip</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity 
+                  style={styles.joinedButton}
+                  onPress={() => Alert.alert('Already Joined', 'You have already joined this trip.')}
+                >
+                  <MaterialIcons name="check-circle" size={24} color="#FFF" />
+                  <Text style={styles.joinedButtonText}>Already Joined</Text>
+                </TouchableOpacity>
+              )}
+            </>
           )}
 
           {trip.itinerary?.length > 0 && (
@@ -249,9 +316,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 8,
   },
-  dayHeaderLeft: {
-    flex: 1,
-  },
+  dayHeaderLeft: { flex: 1 },
   dayNumber: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -350,9 +415,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     marginRight: 16,
   },
-  hostInfo: {
-    flex: 1,
-  },
+  hostInfo: { flex: 1 },
   hostName: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -375,6 +438,45 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: '600',
+  },
+  joinButton: {
+    backgroundColor: '#6366F1',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  joinButtonDisabled: {
+    backgroundColor: '#A5A6F6',
+    opacity: 0.8,
+  },
+  joinButtonText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  joinedButton: {
+    backgroundColor: '#10B981',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  joinedButtonText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 8,
   },
 });
 
