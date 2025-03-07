@@ -4,6 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import { register } from '../../lib/auth';
 import AuthInput from './AuthInput';
 import styles from '../../styles';
+import Toast from 'react-native-toast-message';
 
 
 const RegistrationForm = ({ navigation }) => {
@@ -23,6 +24,11 @@ const RegistrationForm = ({ navigation }) => {
     setLoading(true);
     try {
       await register(name, email, password);
+      Toast.show({
+        type: 'success',
+        text1: 'Registration successful!',
+        text2: 'Please login with your credentials'
+      });
       navigation.navigate('Login');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');

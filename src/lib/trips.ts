@@ -242,3 +242,16 @@ export const searchTrips = async (query: string): Promise<Trip[]> => {
     throw error;
   }
 };
+
+export const getMyTrips = async (): Promise<Trip[]> => {
+  try {
+    const response = await axios.post<Trip[]>('/trips/my-trips');
+    return response.data;
+  } catch (error: any) {
+    Toast.show({
+      type: 'error',
+      text1: 'Failed to fetch your trips'
+    });
+    throw error;
+  }
+};

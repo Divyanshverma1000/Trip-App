@@ -17,7 +17,7 @@ const TripBlogForm = ({ navigation }) => {
     estimatedBudget: 0,
     tags: [],
     packingEssentials: [],
-    isPublic: true,
+    // isPublic: 'false',
     status: 'planning'
   });
 
