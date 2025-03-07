@@ -12,7 +12,7 @@ import {
   Platform
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons, Feather } from '@expo/vector-icons';
 import Animated, { 
   FadeInDown, 
   FadeInRight, 
@@ -208,21 +208,29 @@ const HomeScreen = () => {
           <Text style={styles.greeting}>Hello, {user?.name || 'Guest'}</Text>
           <Text style={styles.subGreeting}>Where to next?</Text>
         </Animated.View>
-        <AnimatedTouchableOpacity
-          entering={FadeInDown.delay(500).springify()}
-          style={styles.notificationContainer}
-          onPress={() => navigation.navigate('Notification')}
-        >
-          <Ionicons name="notifications-outline" size={28} color="#FFF" />
-          {unreadCount > 0 && (
-            <Animated.View 
-              entering={FadeIn.delay(600).springify()}
-              style={styles.badge}
-            >
-              <Text style={styles.badgeText}>{unreadCount}</Text>
-            </Animated.View>
-          )}
-        </AnimatedTouchableOpacity>
+        <View style={styles.headerActions}>
+          {/* Blog Post Creation Button */}
+          <TouchableOpacity
+            style={styles.createButton}
+            onPress={() => navigation.navigate('TripBlogForm')}
+          >
+            <Feather name="edit-3" size={20} color="#4CAF50" />
+            <Text style={styles.createButtonText}>New Blog</Text>
+          </TouchableOpacity>
+
+          {/* Existing Notification Button */}
+          <TouchableOpacity
+            style={styles.notificationContainer}
+            onPress={() => navigation.navigate('Notification')}
+          >
+            <Ionicons name="notifications-outline" size={28} color="#FFF" />
+            {unreadCount > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{unreadCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </Animated.View>
 
       {/* Animated Search Bar */}
@@ -368,6 +376,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     marginTop: 4
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  createButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FFF0',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#4CAF50',
+  },
+  createButtonText: {
+    color: '#4CAF50',
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 4,
   },
   notificationContainer: {
     backgroundColor: '#4CAF50', // Updated accent color

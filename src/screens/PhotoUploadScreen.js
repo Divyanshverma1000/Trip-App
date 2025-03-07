@@ -47,6 +47,14 @@ const PhotoUploadScreen = ({ navigation, route }) => {
     });
   };
 
+  const handleFinishUpload = () => {
+    navigation.navigate('ReviewPost', {
+      blogData: route.params.blogData,
+      itineraryData: route.params.itineraryData,
+      photos: photos
+    });
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Upload Cover Photo</Text>

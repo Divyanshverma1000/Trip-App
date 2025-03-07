@@ -1,4 +1,5 @@
 import axios from './axios';
+import Toast from 'react-native-toast-message';
 
 export interface User {
   _id: string;
@@ -58,4 +59,19 @@ export const updateProfilePhoto = async (photo: {
     },
   });
   return response.data;
+};
+
+export const searchUsers = async (query: string): Promise<User[]> => {
+  try {
+    const response = await axios.get<User[]>('/users/search', {
+      params: { query }
+    });
+    return response.data;
+  } catch (error: any) {
+    Toast.show({
+      type: 'error',
+      text1: 'Failed to search users'
+    });
+    throw error;
+  }
 };

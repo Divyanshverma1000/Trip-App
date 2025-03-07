@@ -33,16 +33,16 @@ export interface BlogPost {
 
 export const createBlogPost = async (
   tripId: string,
-  caption: string,
-  photos: Array<{ url: string; caption?: string }>,
-  content: string
+  // caption: string,
+  // photos: Array<{ url: string; caption?: string }>,
+  // content: string
 ): Promise<BlogPost> => {
   try {
     const response = await axios.post<BlogPost>('/blogs', {
       tripId,
-      caption,
-      photos,
-      content
+      // caption,
+      // photos,
+      
     });
     Toast.show({
       type: 'success',

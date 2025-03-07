@@ -60,7 +60,12 @@ const DayItineraryScreen = ({ navigation, route }) => {
   };
 
   const handleFinishItinerary = () => {
-    handleAddDay(true);
+    const itineraryData = [...itinerary, currentDay];
+    
+    navigation.navigate('PhotoUpload', {
+      blogData: route.params.blogData,
+      itineraryData
+    });
   };
 
   return (

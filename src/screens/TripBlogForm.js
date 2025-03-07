@@ -69,6 +69,30 @@ const TripBlogForm = ({ navigation }) => {
     navigation.navigate('TripItinerary', { tripDetails });
   };
 
+  const handleSubmit = () => {
+    // Validate form data
+    if (!tripDetails.title || !tripDetails.description) {
+      Toast.show({
+        type: 'error',
+        text1: 'Required Fields Missing',
+        text2: 'Please fill in all required fields'
+      });
+      return;
+    }
+
+    const blogData = {
+      title: tripDetails.title,
+      description: tripDetails.description,
+      metadata: tripDetails.metadata,
+      estimatedBudget: tripDetails.estimatedBudget,
+      tags: tripDetails.tags,
+      packingEssentials: tripDetails.packingEssentials,
+      status: tripDetails.status
+    };
+
+    navigation.navigate('DayItinerary', { blogData });
+  };
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.sectionTitle}>Basic Details</Text>

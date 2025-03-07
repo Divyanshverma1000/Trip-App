@@ -17,6 +17,9 @@ import PhotoUploadScreen from '../screens/PhotoUploadScreen';
 import TripItineraryScreen from '../screens/TripItineraryScreen';
 import Toast from 'react-native-toast-message';
 import { NotificationProvider } from '../context/NotificationContext';
+import CreateTripScreen from '../screens/CreateTripScreen';
+import InviteFriendsScreen from '../screens/InviteFriendsScreen';
+import TripItineraryFormScreen from '../screens/TripItineraryScreen';
 
 export const navigationRef = createNavigationContainerRef();
 export const AuthContext = createContext({
@@ -122,6 +125,9 @@ const AppNavigator = () => {
                 <Stack.Screen name="DayItinerary" component={DayItenaryScreen} />
                 <Stack.Screen name="PhotoUpload" component={PhotoUploadScreen} />
                 <Stack.Screen name="TripItinerary" component={TripItineraryScreen} />
+                <Stack.Screen name="CreateTrip" component={CreateTripScreen} />
+                <Stack.Screen name="InviteFriends" component={InviteFriendsScreen} />
+                {/* <Stack.Screen name="TripItineraryForm" component={TripItineraryFormScreen} /> */}
               </>
             ) : (
               <>

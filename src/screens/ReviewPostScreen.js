@@ -1,83 +1,62 @@
 // src/screens/ReviewPostScreen.js
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, ScrollView } from 'react-native';
-import { createTrip } from '../lib/trips';
+import { View, Text, Image, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { createBlogPost } from '../lib/blogs';
+import { createTrip } from '../lib/trips';
 import Toast from 'react-native-toast-message';
+import { Feather } from '@expo/vector-icons';
 
 const ReviewPostScreen = ({ navigation, route }) => {
-  const { tripDetails, itinerary, photos } = route.params;
-  const [caption, setCaption] = useState('');
-  const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  const { blogData = {}, itineraryData = [], photos = [] } = route.params || {};
 
-  const handleCreatePost = async () => {
-    if (!caption || !content) {
-      Toast.show({
-        type: 'error',
-        text1: 'Please fill in all fields'
-      });
+  const handlePublish = async () => {
+    if (!blogData || !itineraryData) {
+      Toast.show({ type: 'error', text1: 'Missing Data', text2: 'Please complete all previous steps' });
       return;
     }
 
     setLoading(true);
     try {
-      // Create trip first
+      // First create the trip
       const tripFormData = new FormData();
+      tripFormData.append('title', blogData.title);
+      tripFormData.append('description', blogData.description);
+      tripFormData.append('itinerary', JSON.stringify(itineraryData));
       
-      // Add basic trip details
-      tripFormData.append('title', tripDetails.title);
-      tripFormData.append('status', 'planning');
-      tripFormData.append('isPublic', 'false');
-      
-      // Add metadata and other objects as JSON strings
-      tripFormData.append('metadata', JSON.stringify(tripDetails.metadata));
-      tripFormData.append('itinerary', JSON.stringify(itinerary));
-      if (tripDetails.tags) {
-        tripFormData.append('tags', JSON.stringify(tripDetails.tags));
+      // Only append first photo to reduce payload size
+      if (photos.length > 0) {
+        const photo = {
+          uri: photos[0].uri,
+          type: 'image/jpeg',
+          name: 'cover.jpg'
+        };
+        tripFormData.append('coverPhoto', photo);
       }
 
-      // Add cover photo
-      if (photos && photos.length > 0) {
-        const coverPhoto = photos[0];
-        tripFormData.append('coverPhoto', {
-          uri: coverPhoto.uri,
-          name: coverPhoto.name || 'photo.jpg',
-          type: coverPhoto.type || 'image/jpeg'
-        });
+      const trip = await createTrip(tripFormData);
+
+      if (!trip?._id) {
+        throw new Error('Failed to get trip ID from response');
       }
 
-      // Create the trip
-      const createdTrip = await createTrip(tripFormData);
-      console.log('Created trip:', createdTrip);
-
-      // Now create the blog post
-      // We'll use the URLs returned from the trip creation
-      const blogPhotos = photos.map((photo, index) => ({
-        url: index === 0 ? createdTrip.coverPhoto : photo.uri, // Use coverPhoto URL for first photo
-        caption: '' // Optional caption for each photo
-      }));
-
-      // Create blog post with the trip's ID and processed photos
+      // Create blog post with trip ID
       await createBlogPost(
-        createdTrip._id,
-        caption,
-        blogPhotos, // Use the processed photos array
-        content
+        trip._id,
+        blogData.title,
+        photos.map(p => ({ url: p.uri })),
+        blogData.description
       );
-
-      Toast.show({
-        type: 'success',
-        text1: 'Trip and blog post created successfully!'
-      });
-
-      navigation.navigate('Profile');
+      
+      Toast.show({ type: 'success', text1: 'Trip and Blog Posted Successfully!' });
+      navigation.navigate('Main');
     } catch (error) {
-      console.error('Error creating post:', error);
-      Toast.show({
-        type: 'error',
-        text1: 'Failed to create post',
-        text2: error.message
+      console.error('Publishing error:', error);
+      Toast.show({ 
+        type: 'error', 
+        text1: 'Failed to post content', 
+        text2: error.message || 'Please try again later'
       });
     } finally {
       setLoading(false);
@@ -85,117 +64,72 @@ const ReviewPostScreen = ({ navigation, route }) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Review Your Post</Text>
-
-      {/* Trip Details Summary */}
-      <View style={styles.summarySection}>
-        <Text style={styles.sectionTitle}>Trip Details</Text>
-        <Text style={styles.summaryText}>Title: {tripDetails.title}</Text>
-        <Text style={styles.summaryText}>Description: {tripDetails.description}</Text>
-        <Text style={styles.summaryText}>Destination: {tripDetails.metadata?.destination}</Text>
-        <Text style={styles.summaryText}>Duration: {itinerary.length} days</Text>
-        <Text style={styles.summaryText}>Estimated Budget: ${tripDetails.estimatedBudget}</Text>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Feather name="arrow-left" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Review Blog Post</Text>
+        <TouchableOpacity style={styles.publishButton} onPress={handlePublish} disabled={loading}>
+          {loading ? <ActivityIndicator color="#FFF" /> : <Feather name="check" size={24} color="#FFF" />}
+        </TouchableOpacity>
       </View>
 
-      {/* Cover Photo Preview */}
-      {tripDetails.coverPhoto && (
-        <View style={styles.photoSection}>
-          <Text style={styles.sectionTitle}>Cover Photo</Text>
-          <Image 
-            source={{ uri: tripDetails.coverPhoto.uri }}
-            style={styles.coverPhoto}
-          />
+      <ScrollView style={styles.content}>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Blog Details</Text>
+          <Text style={styles.label}>Title</Text>
+          <Text style={styles.value}>{blogData.title || 'No title provided'}</Text>
+          <Text style={styles.label}>Description</Text>
+          <Text style={styles.value}>{blogData.description || 'No description provided'}</Text>
         </View>
-      )}
 
-      {/* Blog Content */}
-      <View style={styles.blogSection}>
-        <Text style={styles.sectionTitle}>Blog Content</Text>
-        <TextInput
-          style={styles.captionInput}
-          placeholder="Add a caption..."
-          value={caption}
-          onChangeText={setCaption}
-          multiline
-        />
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Itinerary</Text>
+          {itineraryData.length > 0 ? itineraryData.map((day, index) => (
+            <View key={index} style={styles.dayContainer}>
+              <Text style={styles.dayTitle}>Day {day.day}</Text>
+              <Text style={styles.dayNotes}>{day.dayNotes}</Text>
+            </View>
+          )) : <Text style={styles.noData}>No itinerary data provided</Text>}
+        </View>
 
-        <TextInput
-          style={[styles.captionInput, styles.contentInput]}
-          placeholder="Write your blog content..."
-          value={content}
-          onChangeText={setContent}
-          multiline
-        />
-      </View>
-
-      <Button
-        title={loading ? "Creating..." : "Create Post"}
-        onPress={handleCreatePost}
-        disabled={loading || !caption || !content}
-      />
-    </ScrollView>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Photos</Text>
+          <View style={styles.photoGrid}>
+            {photos.length > 0 ? photos.map((photo, index) => (
+              <View key={index} style={styles.photoContainer}>
+                <Image source={{ uri: photo.uri }} style={styles.photo} />
+              </View>
+            )) : <Text style={styles.noData}>No photos added</Text>}
+          </View>
+          {photos.length > 1 && (
+            <Text style={styles.warning}>Note: Only the first photo will be uploaded due to size limitations</Text>
+          )}
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#fff'
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333'
-  },
-  summarySection: {
-    backgroundColor: '#f5f5f5',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 20
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 10,
-    color: '#444'
-  },
-  summaryText: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 5
-  },
-  photoSection: {
-    marginBottom: 20
-  },
-  coverPhoto: {
-    width: '100%',
-    height: 200,
-    borderRadius: 8,
-    marginBottom: 10
-  },
-  blogSection: {
-    marginBottom: 20
-  },
-  captionInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 15,
-    fontSize: 16
-  },
-  contentInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    height: 200,
-    textAlignVertical: 'top',
-    fontSize: 16
-  }
+  container: { flex: 1, backgroundColor: '#FFF' },
+  header: { flexDirection: 'row', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: '#EEE', position: 'relative' },
+  headerTitle: { fontSize: 20, fontWeight: 'bold', flex: 1, textAlign: 'center' },
+  publishButton: { backgroundColor: '#4CAF50', padding: 10, borderRadius: 8, position: 'absolute', right: 16, top: '50%', transform: [{ translateY: -12 }] },
+  content: { flex: 1, padding: 16 },
+  section: { marginBottom: 24 },
+  sectionTitle: { fontSize: 18, fontWeight: '600', marginBottom: 12, color: '#333' },
+  label: { fontSize: 14, color: '#666', marginBottom: 4 },
+  value: { fontSize: 16, marginBottom: 12 },
+  dayContainer: { marginBottom: 16, padding: 12, backgroundColor: '#F5F5F5', borderRadius: 8 },
+  dayTitle: { fontSize: 16, fontWeight: '500', marginBottom: 8 },
+  dayNotes: { fontSize: 14, color: '#666' },
+  photoGrid: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -4 },
+  photoContainer: { width: '33.33%', padding: 4 },
+  photo: { width: '100%', aspectRatio: 1, borderRadius: 4 },
+  noData: { fontSize: 14, color: '#666', fontStyle: 'italic' },
+  warning: { fontSize: 12, color: '#ff6b6b', marginTop: 8, fontStyle: 'italic' }
 });
 
 export default ReviewPostScreen;
