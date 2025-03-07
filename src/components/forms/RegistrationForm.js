@@ -49,7 +49,7 @@ const RegistrationForm = ({ navigation }) => {
 
         <AuthInput
           icon="user"
-          placeholder="Namee"
+          placeholder="Name"
           value={name}
           onChangeText={setName}
         />
