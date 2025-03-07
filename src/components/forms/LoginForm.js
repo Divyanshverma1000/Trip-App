@@ -5,9 +5,10 @@ import { AuthContext } from '../../navigation/AppNavigator';
 import { login } from '../../lib/auth';
 import AuthInput from './AuthInput';
 import styles from '../../styles';
+import Toast from 'react-native-toast-message';
 
 const LoginForm = ({ navigation }) => {
-  const { setIsAuthenticated } = useContext(AuthContext);
+  const { setIsAuthenticated, setUser } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,8 +23,13 @@ const LoginForm = ({ navigation }) => {
     setError('');
     setLoading(true);
     try {
-      await login(email, password);
+      const response = await login(email, password);
+      setUser(response.user);
       setIsAuthenticated(true);
+      Toast.show({
+        type: 'success',
+        text1: 'Welcome back!'
+      });
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {

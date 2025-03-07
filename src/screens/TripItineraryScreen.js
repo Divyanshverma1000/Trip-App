@@ -133,8 +133,8 @@ const TripItineraryScreen = ({ navigation, route }) => {
       navigation.navigate('PhotoUpload', {
         tripDetails: {
           ...tripDetails,
-          itinerary: updatedItinerary
-        }
+          itinerary: updatedItinerary,
+          }
       });
     } else {
       setCurrentDay({

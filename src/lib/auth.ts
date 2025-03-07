@@ -21,12 +21,13 @@ export const register = async (name: string, email: string, password: string) =>
       email,
       password,
     });
-    await setStorageItem('authToken', response.data.token);
     return response.data;
   } catch (error: any) {
+    const errorMessage = error.response?.data?.message || 'Registration failed. Please try again.';
     Toast.show({
       type: 'error',
-      text1: 'Registration failed',
+      text1: 'Registration Error',
+      text2: errorMessage,
     });
     throw error;
   }
@@ -36,6 +37,7 @@ export const login = async (email: string, password: string) => {
   try {
     const response = await axios.post<AuthResponse>('/auth/login', { email, password });
     await setStorageItem('authToken', response.data.token);
+    await setStorageItem('userData', JSON.stringify(response.data.user));
     return response.data;
   } catch (error: any) {
     const errorMessage = error.response?.data?.message || 'Login failed. Please try again.';
@@ -61,28 +63,6 @@ export const forgotPassword = async (email: string) => {
       text1: 'Failed to send reset instructions',
     });
     throw error;
-  }
-};
-
-
-
-export const logout = async (navigation: any) => {
-  await removeStorageItem('authToken');
-
-  // Show logout confirmation
-  Toast.show({
-    type: 'success',
-    text1: 'Logged out successfully!',
-  });
-
-  // Ensure navigation works
-  if (navigationRef.isReady()) {
-    navigationRef.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: 'Login' }],
-      })
-    );
   }
 };
 

@@ -1,16 +1,39 @@
 // HomeScreen.jsx
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState, useContext } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+  Dimensions,
+  Platform
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import Animated, { 
+  FadeInDown, 
+  FadeInRight, 
+  FadeIn,
+  SlideInDown,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  interpolate,
+  withSpring
+} from 'react-native-reanimated';
 import SearchBar from '../components/SearchBar';
-import NotificationsIcon from '../components/NotificationsIcon';
 import BlogCard from '../components/BlogCard';
 import TripCard from '../components/TripCard';
 import { getOpenTrips } from '../lib/trips';
 import { getBlogPosts, searchBlogs } from '../lib/blogs';
-import globalStyles from '../styles';
-import homeStyles from '../styles/HomeStyles';
+import { getProfile } from '../lib/user';
+import { NotificationContext } from '../context/NotificationContext';
+
+const { width } = Dimensions.get('window');
+const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
 const HomeScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,11 +43,54 @@ const HomeScreen = () => {
   const [loadingTrending, setLoadingTrending] = useState(false);
   const [loadingOpen, setLoadingOpen] = useState(false);
   const [loadingSearch, setLoadingSearch] = useState(false);
-  const [user, setUser] = useState({name: 'John'}); // Replace with actual user data
+  const [user, setUser] = useState(null);
 
   const navigation = useNavigation();
+  const { unreadCount } = useContext(NotificationContext);
+
+  // Animation values
+  const scrollY = useSharedValue(0);
+  const headerHeight = useSharedValue(150);
+  const fabAnimation = useSharedValue(0);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
+  // Header animation
+  const headerStyle = useAnimatedStyle(() => {
+    const height = interpolate(
+      scrollY.value,
+      [0, 100],
+      [150, 100],
+      'clamp'
+    );
+
+    return {
+      height,
+      opacity: interpolate(scrollY.value, [0, 100], [1, 0.9]),
+    };
+  });
+
+  // FAB animation
+  const fabStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          scale: withSpring(scrollY.value > 100 ? 1 : 0.8),
+        },
+        {
+          translateY: withSpring(scrollY.value > 100 ? 0 : 20),
+        },
+      ],
+      opacity: withSpring(scrollY.value > 100 ? 1 : 0.8),
+    };
+  });
 
   useEffect(() => {
+    fetchUserProfile();
     fetchTrendingBlogs();
     fetchOpenTrips();
   }, []);
@@ -34,6 +100,15 @@ const HomeScreen = () => {
       fetchSearchResults();
     }
   }, [searchQuery]);
+
+  const fetchUserProfile = async () => {
+    try {
+      const userProfile = await getProfile();
+      setUser(userProfile);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
 
   const fetchTrendingBlogs = async () => {
     setLoadingTrending(true);
@@ -56,17 +131,10 @@ const HomeScreen = () => {
     setLoadingOpen(true);
     try {
       const response = await getOpenTrips();
-      console.log('Open trips response:', response); // Debug log
-
-      // Filter trips that are public and either in planning or ongoing status
-      const filteredTrips = response.filter(trip => 
-        trip.isPublic && (trip.status === 'planning' || trip.status === 'ongoing')
+      const filteredTrips = response.filter(
+        (trip) => trip.isPublic && (trip.status === 'planning' || trip.status === 'ongoing')
       );
-
-      console.log('Filtered trips:', filteredTrips); // Debug log
-
-      // Map the filtered trips to the required format
-      const formattedTrips = filteredTrips.map(trip => ({
+      const formattedTrips = filteredTrips.map((trip) => ({
         _id: trip._id,
         title: trip.title,
         description: trip.description,
@@ -82,8 +150,6 @@ const HomeScreen = () => {
         packingEssentials: trip.packingEssentials,
         tags: trip.tags
       }));
-
-      console.log('Formatted trips:', formattedTrips); // Debug log
       setOpenTrips(formattedTrips);
     } catch (error) {
       console.error('Error fetching open trips:', error);
@@ -112,60 +178,91 @@ const HomeScreen = () => {
     navigation.navigate('TripDetailsScreen', { tripId });
   };
 
-  const renderBlogCard = ({ item }) => (
-    <BlogCard blog={item} onPress={() => handleBlogPress(item._id)} />
+  const renderBlogCard = ({ item, index }) => (
+    <Animated.View
+      entering={FadeInRight.delay(index * 200).springify()}
+    >
+      <BlogCard blog={item} onPress={() => handleBlogPress(item._id)} />
+    </Animated.View>
   );
 
-  const renderTripCard = ({ item }) => (
-    <TripCard 
-      trip={item}  // Simplified - pass the entire item since it's already formatted
-      onPress={() => handleTripPress(item._id)} 
-    />
+  const renderTripCard = ({ item, index }) => (
+    <Animated.View
+      entering={FadeInDown.delay(index * 200).springify()}
+    >
+      <TripCard
+        trip={item}
+        onPress={() => handleTripPress(item._id)}
+      />
+    </Animated.View>
   );
 
   return (
-    <View style={[globalStyles.background, homeStyles.container]}>
-      {/* Top Header */}
-      <View style={homeStyles.topHeader}>
-        <View style={homeStyles.userGreeting}>
-          <Text style={homeStyles.greeting}>Hello, {user.name}</Text>
-          <Text style={homeStyles.subGreeting}>where to next?</Text>
-        </View>
-        <TouchableOpacity 
-          style={homeStyles.notificationContainer}
-          onPress={() => navigation.navigate('NotificationsScreen')}
+    <View style={styles.container}>
+      {/* Animated Header */}
+      <Animated.View style={[styles.headerContainer, headerStyle]}>
+        <Animated.View 
+          entering={FadeInDown.delay(300).springify()}
+          style={styles.greetingContainer}
         >
-          <Ionicons name="notifications-outline" size={28} color="#333" />
-        </TouchableOpacity>
-      </View>
+          <Text style={styles.greeting}>Hello, {user?.name || 'Guest'}</Text>
+          <Text style={styles.subGreeting}>Where to next?</Text>
+        </Animated.View>
+        <AnimatedTouchableOpacity
+          entering={FadeInDown.delay(500).springify()}
+          style={styles.notificationContainer}
+          onPress={() => navigation.navigate('Notification')}
+        >
+          <Ionicons name="notifications-outline" size={28} color="#FFF" />
+          {unreadCount > 0 && (
+            <Animated.View 
+              entering={FadeIn.delay(600).springify()}
+              style={styles.badge}
+            >
+              <Text style={styles.badgeText}>{unreadCount}</Text>
+            </Animated.View>
+          )}
+        </AnimatedTouchableOpacity>
+      </Animated.View>
 
-      {/* Search Section */}
-      <View style={homeStyles.searchContainer}>
+      {/* Animated Search Bar */}
+      <Animated.View 
+        entering={SlideInDown.delay(400).springify()}
+        style={styles.searchContainer}
+      >
         <SearchBar
           placeholder="Search amazing experiences..."
           value={searchQuery}
-          onChangeText={(text) => setSearchQuery(text)}
+          onChangeText={setSearchQuery}
           icon={<Ionicons name="search" size={20} color="#666" />}
         />
-      </View>
+      </Animated.View>
 
-      <ScrollView style={homeStyles.content} showsVerticalScrollIndicator={false}>
+      <Animated.ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
+      >
         {searchQuery.trim() === '' ? (
           <>
             {/* Trending Blogs Section */}
-            <View style={homeStyles.trendingSection}>
-              <View style={homeStyles.sectionHeader}>
-                <View style={homeStyles.titleContainer}>
-                  <MaterialIcons name="trending-up" size={24} color="#FF385C" />
-                  <Text style={homeStyles.sectionTitle}>Trending Blogs</Text>
+            <Animated.View 
+              entering={FadeInDown.delay(500).springify()}
+              style={styles.section}
+            >
+              <View style={styles.sectionHeader}>
+                <View style={styles.titleContainer}>
+                  <MaterialIcons name="trending-up" size={24} color="#4CAF50" />
+                  <Text style={styles.sectionTitle}>Trending Blogs</Text>
                 </View>
-                <TouchableOpacity style={homeStyles.seeAllButton}>
-                  <Text style={homeStyles.seeAllText}>View All</Text>
-                  <MaterialIcons name="arrow-forward-ios" size={14} color="#FF385C" />
+                <TouchableOpacity style={styles.seeAllButton}>
+                  <Text style={styles.seeAllText}>View All</Text>
+                  <MaterialIcons name="arrow-forward-ios" size={14} color="#4CAF50" />
                 </TouchableOpacity>
               </View>
               {loadingTrending ? (
-                <ActivityIndicator size="large" color="#FF385C" />
+                <ActivityIndicator size="large" color="#4CAF50" />
               ) : (
                 <FlatList
                   data={trendingBlogs.slice(0, 5)}
@@ -174,25 +271,28 @@ const HomeScreen = () => {
                   showsVerticalScrollIndicator={false}
                 />
               )}
-            </View>
+            </Animated.View>
 
             {/* Open Trips Section */}
-            <View style={homeStyles.openTripsSection}>
-              <View style={homeStyles.sectionHeader}>
-                <View style={homeStyles.titleContainer}>
-                  <Ionicons name="map-outline" size={24} color="#FF385C" />
-                  <Text style={homeStyles.sectionTitle}>Open Trips</Text>
+            <Animated.View 
+              entering={FadeInDown.delay(700).springify()}
+              style={styles.section}
+            >
+              <View style={styles.sectionHeader}>
+                <View style={styles.titleContainer}>
+                  <Ionicons name="map-outline" size={24} color="#4CAF50" />
+                  <Text style={styles.sectionTitle}>Open Trips</Text>
                 </View>
-                <TouchableOpacity 
-                  style={homeStyles.seeAllButton}
+                <TouchableOpacity
+                  style={styles.seeAllButton}
                   onPress={() => navigation.navigate('AllTripsScreen')}
                 >
-                  <Text style={homeStyles.seeAllText}>See All</Text>
-                  <MaterialIcons name="arrow-forward-ios" size={14} color="#FF385C" />
+                  <Text style={styles.seeAllText}>See All</Text>
+                  <MaterialIcons name="arrow-forward-ios" size={14} color="#4CAF50" />
                 </TouchableOpacity>
               </View>
               {loadingOpen ? (
-                <ActivityIndicator size="large" color="#FF385C" />
+                <ActivityIndicator size="large" color="#4CAF50" />
               ) : (
                 <FlatList
                   data={openTrips}
@@ -200,16 +300,19 @@ const HomeScreen = () => {
                   renderItem={renderTripCard}
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={homeStyles.horizontalListContainer}
+                  contentContainerStyle={styles.horizontalListContainer}
                 />
               )}
-            </View>
+            </Animated.View>
           </>
         ) : (
-          <View style={homeStyles.searchResultsSection}>
-            <Text style={homeStyles.sectionTitle}>Search Results</Text>
+          <Animated.View 
+            entering={FadeInDown}
+            style={styles.section}
+          >
+            <Text style={styles.sectionTitle}>Search Results</Text>
             {loadingSearch ? (
-              <ActivityIndicator size="large" color="#FF385C" />
+              <ActivityIndicator size="large" color="#4CAF50" />
             ) : (
               <FlatList
                 data={searchResults}
@@ -218,20 +321,139 @@ const HomeScreen = () => {
                 showsVerticalScrollIndicator={false}
               />
             )}
-          </View>
+          </Animated.View>
         )}
-      </ScrollView>
+      </Animated.ScrollView>
 
-      {/* Floating Action Button */}
-      <TouchableOpacity
-        style={homeStyles.fab}
+      {/* Animated FAB */}
+      <AnimatedTouchableOpacity
+        style={[styles.fab, fabStyle]}
         onPress={() => navigation.navigate('OnGoingTripsScreen')}
       >
         <Ionicons name="airplane" size={24} color="#FFF" />
-        <Text style={homeStyles.fabText}>Current Trips</Text>
-      </TouchableOpacity>
+        <Text style={styles.fabText}>Current Trips</Text>
+      </AnimatedTouchableOpacity>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFF' // Light background
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#F8F8F8',
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 60 : 16,
+    zIndex: 100,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3
+  },
+  greetingContainer: {
+    flex: 1
+  },
+  greeting: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#333'
+  },
+  subGreeting: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 4
+  },
+  notificationContainer: {
+    backgroundColor: '#4CAF50', // Updated accent color
+    padding: 10,
+    borderRadius: 30
+  },
+  searchContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: '#FFF'
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+    backgroundColor: '#FFF'
+  },
+  section: {
+    marginBottom: 30
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+    marginLeft: 10
+  },
+  seeAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  seeAllText: {
+    color: '#4CAF50', // Updated accent color
+    fontSize: 16,
+    fontWeight: '500',
+    marginRight: 5
+  },
+  horizontalListContainer: {
+    paddingVertical: 10
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 30,
+    right: 30,
+    backgroundColor: '#4CAF50',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 30,
+    flexDirection: 'row',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  fabText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 10
+  },
+  badge: {
+    position: 'absolute',
+    right: -6,
+    top: -6,
+    backgroundColor: '#FF5252',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badgeText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+});
 
 export default HomeScreen;

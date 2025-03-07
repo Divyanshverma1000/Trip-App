@@ -28,7 +28,7 @@ const ReviewPostScreen = ({ navigation, route }) => {
       // Add basic trip details
       tripFormData.append('title', tripDetails.title);
       tripFormData.append('status', 'planning');
-      tripFormData.append('isPublic', 'true');
+      tripFormData.append('isPublic', 'false');
       
       // Add metadata and other objects as JSON strings
       tripFormData.append('metadata', JSON.stringify(tripDetails.metadata));
