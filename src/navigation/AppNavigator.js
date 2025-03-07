@@ -1,16 +1,21 @@
-// src/navigation/AppNavigator.js
 import React, { useEffect, useState, createContext } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer ,createNavigationContainerRef } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { getStorageItem } from '../lib/storage'; 
 import SplashScreen from '../screens/SplashScreen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import ResetPasswordScreen from '../screens/ResetPasswordScreen';
 import BottomTabNavigator from './BottomTabNavigator';
+import NotificationsScreen from '../screens/NotificationsScreen';
 import TripDetailsScreen from '../screens/TripDetailsScreen';
-
+import BlogDetailsScreen from '../screens/BlogDetailsScreen';
+import ReviewPostScreen from '../screens/ReviewPostScreen';
+import TripBlogForm from '../screens/TripBlogForm';
+import DayItenaryScreen from '../screens/DayItenaryScreen';
+import PhotoUploadScreen from '../screens/PhotoUploadScreen';
+import TripItineraryScreen from '../screens/TripItineraryScreen';
+export const navigationRef = createNavigationContainerRef();
 export const AuthContext = createContext();
 
 const Stack = createStackNavigator();
@@ -22,12 +27,14 @@ const AppNavigator = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = await AsyncStorage.getItem('authToken');
+        const token = await  getStorageItem('authToken');
         setIsAuthenticated(!!token);
       } catch (error) {
         console.error('Error checking auth:', error);
       }
-      setLoading(false);
+      setTimeout(() => {
+        setLoading(false);
+      }, 5000);
     };
 
     checkAuth();
@@ -39,18 +46,21 @@ const AppNavigator = () => {
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {isAuthenticated ? (
-            // Authenticated flow
             <>
-              {/* "Main" renders your Bottom Tab Navigator */}
               <Stack.Screen name="Main" component={BottomTabNavigator} />
-              {/* Additional screens like TripDetails can be pushed from the tabs */}
-              <Stack.Screen name="TripDetails" component={TripDetailsScreen} />
+              <Stack.Screen name="Notification" component={NotificationsScreen} /> 
+              <Stack.Screen name="TripDetailsScreen" component={TripDetailsScreen} /> 
+              <Stack.Screen name="BlogDetailsScreen" component={BlogDetailsScreen} />
+              <Stack.Screen name="ReviewPost" component={ReviewPostScreen} />
+              <Stack.Screen name="TripBlogForm" component={TripBlogForm} />
+              <Stack.Screen name="DayItinerary" component={DayItenaryScreen} />
+              <Stack.Screen name="PhotoUpload" component={PhotoUploadScreen} />
+              <Stack.Screen name="TripItinerary" component={TripItineraryScreen} />
             </>
           ) : (
-            // Unauthenticated flow
             <>
               <Stack.Screen name="Login" component={LoginScreen} />
               <Stack.Screen name="Register" component={RegisterScreen} />

@@ -3,7 +3,7 @@ import axios from './axios';
 import { setStorageItem, removeStorageItem, getStorageItem } from './storage';
 import Toast from 'react-native-toast-message';
 import { CommonActions } from '@react-navigation/native';
-
+import { navigationRef } from '../navigation/AppNavigator';
 
 export interface AuthResponse {
   token: string;
@@ -21,7 +21,7 @@ export const register = async (name: string, email: string, password: string) =>
       email,
       password,
     });
-    await setStorageItem('token', response.data.token);
+    await setStorageItem('authToken', response.data.token);
     return response.data;
   } catch (error: any) {
     Toast.show({
@@ -35,7 +35,7 @@ export const register = async (name: string, email: string, password: string) =>
 export const login = async (email: string, password: string) => {
   try {
     const response = await axios.post<AuthResponse>('/auth/login', { email, password });
-    await setStorageItem('token', response.data.token);
+    await setStorageItem('authToken', response.data.token);
     return response.data;
   } catch (error: any) {
     const errorMessage = error.response?.data?.message || 'Login failed. Please try again.';
@@ -67,7 +67,7 @@ export const forgotPassword = async (email: string) => {
 
 
 export const logout = async (navigation: any) => {
-  await removeStorageItem('token');
+  await removeStorageItem('authToken');
 
   // Show logout confirmation
   Toast.show({
@@ -76,17 +76,19 @@ export const logout = async (navigation: any) => {
   });
 
   // Ensure navigation works
-  navigation.dispatch(
-    CommonActions.reset({
-      index: 0,
-      routes: [{ name: 'Login' }],
-    })
-  );
+  if (navigationRef.isReady()) {
+    navigationRef.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      })
+    );
+  }
 };
 
 export const isAuthenticated = async (): Promise<boolean> => {
   try {
-    const token = await getStorageItem('token');
+    const token = await getStorageItem('authToken');
     return !!token; // Ensures it returns true/false properly
   } catch (error) {
     console.error('Error checking authentication:', error);

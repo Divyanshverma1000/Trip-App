@@ -1,3 +1,6 @@
+<!-- Build first time on eas nstall this  -->
+npm install -g eas-cli 
+
 <!-- Build on EAS {Expo Application Services} -->
 eas login 
 eas build:configure
@@ -21,3 +24,17 @@ Run expo doctor – if it warns about native dependencies, a rebuild is needed.
 - Always try running without rebuilding first (`expo start --clear`).
 - Check `expo doctor` or  [`npx expo-doctor`] to confirm if a rebuild is needed before using your limited EAS builds.
 - If you install or modify native dependencies, rebuild using `eas build --profile development --platform android.`
+
+
+## Other build commands 
+- Development build (debugging)	
+   `eas build --profile development --platform android`
+- Preview build (sharing with friends)	
+   `eas build --profile preview --platform android`
+- Production build (for Play Store/App Store)
+   `eas build --profile production --platform android`
+- Submit to Google Play
+	`eas submit --platform android`
+- Submit to Apple App Store
+	`eas submit --platform ios`
+    

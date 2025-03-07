@@ -1,64 +1,169 @@
-// src/screens/ProfileScreen.js
-import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  ActivityIndicator,
+  FlatList,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
+import { getProfile } from '../lib/user';
 
-const dummyTrips = [
-  { id: '1', title: 'Trip to the Mountains', image: require('../../assets/trip1.jpg') },
-  { id: '2', title: 'Beach Getaway', image: require('../../assets/trip2.jpg') },
-];
+const ProfileScreen = ({ navigation }) => {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-const ProfileScreen = () => {
+  const loadProfile = async () => {
+    try {
+      const data = await getProfile();
+      setProfile(data);
+    } catch (error) {
+      console.error('Failed to load profile:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <View style={styles.center}>
+        <Text>Profile not found.</Text>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Image source={require('../../assets/campus.jpg')} style={styles.profileImage} />
-        <Text style={styles.name}>Divyansh | New to Campus</Text>
-        <Text style={styles.bio}>Exploring campus and beyond!</Text>
+    <ScrollView style={styles.container}>
+      <View style={styles.profileHeader}>
+        <Image source={{ uri: profile.photo }} style={styles.profileImage} />
+        <Text style={styles.name}>{profile.name}</Text>
+        <Text style={styles.email}>{profile.email}</Text>
       </View>
-      <View style={styles.stats}>
-        <Text style={styles.stat}>Trips: 5</Text>
-        <Text style={styles.stat}>Likes: 20</Text>
-        <Text style={styles.stat}>Followers: 100</Text>
-      </View>
-      <Text style={styles.sectionTitle}>My Trips</Text>
-      <FlatList
-        data={dummyTrips}
-        horizontal
-        renderItem={({ item }) => (
-          <View style={styles.tripCard}>
-            <Image source={item.image} style={styles.tripImage} />
-            <Text style={styles.tripTitle}>{item.title}</Text>
-          </View>
-        )}
-        keyExtractor={(item) => item.id}
-      />
-      <TouchableOpacity style={styles.editButton}>
-        <Text style={styles.editButtonText}>Edit Profile</Text>
+
+      <TouchableOpacity 
+        style={styles.createButton}
+        onPress={() => navigation.navigate('TripBlogForm')}
+      >
+        <Text style={styles.createButtonText}>Create Trip Blog</Text>
       </TouchableOpacity>
-    </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>
+          Friends ({profile.friends?.length || 0})
+        </Text>
+        <FlatList
+          data={profile.friends}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => (
+            <View style={styles.item}>
+              <Text>{item.name}</Text>
+            </View>
+          )}
+          scrollEnabled={false}
+        />
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>
+          Trip History ({profile.tripHistory?.length || 0})
+        </Text>
+        <FlatList
+          data={profile.tripHistory}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => (
+            <View style={styles.item}>
+              <Text>{item.title}</Text>
+            </View>
+          )}
+          scrollEnabled={false}
+        />
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>
+          Public Posts ({profile.publicPosts?.length || 0})
+        </Text>
+        <FlatList
+          data={profile.publicPosts}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => (
+            <View style={styles.item}>
+              <Text>{item.title}</Text>
+            </View>
+          )}
+          scrollEnabled={false}
+        />
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 15 },
-  header: { alignItems: 'center', marginBottom: 20 },
-  profileImage: { width: 100, height: 100, borderRadius: 50, marginBottom: 10 },
-  name: { fontSize: 20, fontWeight: 'bold' },
-  bio: { fontSize: 14, color: '#666' },
-  stats: { flexDirection: 'row', justifyContent: 'space-around', marginVertical: 15 },
-  stat: { fontSize: 16, fontWeight: 'bold' },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginVertical: 10 },
-  tripCard: { marginRight: 10, alignItems: 'center' },
-  tripImage: { width: 120, height: 80, borderRadius: 8 },
-  tripTitle: { fontSize: 14, marginTop: 5 },
-  editButton: {
-    marginTop: 20,
-    backgroundColor: '#007AFF',
-    padding: 10,
-    borderRadius: 8,
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  editButtonText: { color: '#fff', fontSize: 16 },
+  profileHeader: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  profileImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 12,
+  },
+  name: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  email: {
+    fontSize: 16,
+    color: '#666',
+  },
+  createButton: {
+    backgroundColor: '#6366F1',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  createButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  section: {
+    marginVertical: 10,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    marginBottom: 8,
+  },
+  item: {
+    padding: 10,
+    borderBottomColor: '#ddd',
+    borderBottomWidth: 1,
+  },
 });
 
 export default ProfileScreen;

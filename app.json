@@ -4,7 +4,7 @@
     "slug": "wander",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/TheWanderProject_2048.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,29 +13,17 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/TheWanderProject-nobg_2048.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.anonymous.wander"
     },
     "web": {
       "bundler": "metro",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/WP.png"
     },
-    "plugins": [
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
-        }
-      ]
-    ],
     "experiments": {},
     "extra": {
-      "API_BASE_URL": "http://localhost:5000/api",
       "eas": {
         "projectId": "f8031d21-5772-4ead-9a37-8687b2a0be49"
       }
