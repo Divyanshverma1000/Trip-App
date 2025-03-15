@@ -6,11 +6,13 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  ActivityIndicator
+  ActivityIndicator,
+  Image
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { createTrip } from '../lib/trips';
 import Toast from 'react-native-toast-message';
+import * as ImagePicker from 'expo-image-picker';
 
 const CreateTripScreen = ({ navigation }) => {
   const [tripData, setTripData] = useState({
@@ -26,6 +28,7 @@ const CreateTripScreen = ({ navigation }) => {
   });
   const [loading, setLoading] = useState(false);
   const [currentTag, setCurrentTag] = useState('');
+  const [coverPhoto, setCoverPhoto] = useState(null);
 
   const handleAddTag = () => {
     if (currentTag.trim()) {
@@ -44,19 +47,58 @@ const CreateTripScreen = ({ navigation }) => {
     }));
   };
 
-  const handleNext = () => {
-    // Validate required fields
-    if (!tripData.title || !tripData.description || !tripData.metadata.destination) {
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [16, 9],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setCoverPhoto(result.assets[0]);
+    }
+  };
+
+  const handleCreateTrip = async () => {
+    if (!coverPhoto) {
       Toast.show({
         type: 'error',
-        text1: 'Required Fields Missing',
-        text2: 'Please fill in all required fields'
+        text1: 'Cover photo is required'
       });
       return;
     }
 
-    // Navigate to invite friends screen with trip data
-    navigation.navigate('InviteFriends', { tripData });
+    const formData = new FormData();
+    formData.append('title', tripData.title);
+    formData.append('description', tripData.description);
+    formData.append('isPublic', true);
+    formData.append('metadata', JSON.stringify(tripData.metadata));
+    formData.append('estimatedBudget', tripData.estimatedBudget);
+    formData.append('tags', JSON.stringify(tripData.tags));
+    
+    // Append the cover photo
+    const photoFileName = coverPhoto.uri.split('/').pop();
+    const photoType = 'image/' + (photoFileName.split('.').pop() || 'jpeg');
+    formData.append('coverPhoto', {
+      uri: coverPhoto.uri,
+      name: photoFileName,
+      type: photoType
+    });
+
+    try {
+      setLoading(true);
+      await createTrip(formData);
+      Toast.show({
+        type: 'success',
+        text1: 'Trip created successfully!'
+      });
+      navigation.navigate('Home');
+    } catch (error) {
+      console.error('Failed to create trip:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -145,16 +187,31 @@ const CreateTripScreen = ({ navigation }) => {
           ))}
         </View>
 
+        <Text style={styles.label}>Cover Photo*</Text>
+        <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
+          {coverPhoto ? (
+            <Image 
+              source={{ uri: coverPhoto.uri }} 
+              style={styles.previewImage} 
+            />
+          ) : (
+            <View style={styles.photoPlaceholder}>
+              <Feather name="camera" size={24} color="#666" />
+              <Text style={styles.photoButtonText}>Select Cover Photo</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.nextButton}
-          onPress={handleNext}
+          onPress={handleCreateTrip}
           disabled={loading}
         >
           {loading ? (
             <ActivityIndicator color="#FFF" />
           ) : (
             <>
-              <Text style={styles.nextButtonText}>Next: Invite Friends</Text>
+              <Text style={styles.nextButtonText}>Create Trip</Text>
               <Feather name="arrow-right" size={20} color="#FFF" />
             </>
           )}
@@ -252,6 +309,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginRight: 8,
+  },
+  photoButton: {
+    height: 200,
+    borderWidth: 1,
+    borderColor: '#DDD',
+    borderRadius: 8,
+    marginBottom: 16,
+    overflow: 'hidden',
+  },
+  photoPlaceholder: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+  },
+  photoButtonText: {
+    marginTop: 8,
+    color: '#666',
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
 });
 

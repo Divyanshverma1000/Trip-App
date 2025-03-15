@@ -9,7 +9,7 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { searchUsers } from '../lib/user';
+import { searchUsers as searchUsersApi } from '../lib/user';
 import Toast from 'react-native-toast-message';
 
 const InviteFriendsScreen = ({ navigation, route }) => {
@@ -21,14 +21,14 @@ const InviteFriendsScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     if (searchQuery.trim().length >= 2) {
-      searchUsers(searchQuery);
+      handleSearchUsers(searchQuery);
     }
   }, [searchQuery]);
 
-  const searchUsers = async (query) => {
+  const handleSearchUsers = async (query) => {
     setLoading(true);
     try {
-      const results = await searchUsers(query);
+      const results = await searchUsersApi(query);
       setSearchResults(results);
     } catch (error) {
       Toast.show({

@@ -68,9 +68,11 @@ export const searchUsers = async (query: string): Promise<User[]> => {
     });
     return response.data;
   } catch (error: any) {
+    const errorMessage = error.response?.data?.message || 'Failed to search users';
     Toast.show({
       type: 'error',
-      text1: 'Failed to search users'
+      text1: 'Search failed',
+      text2: errorMessage
     });
     throw error;
   }

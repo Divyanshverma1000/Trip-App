@@ -1,6 +1,7 @@
 // lib/trips.ts
 import axios from './axios';
 import Toast from 'react-native-toast-message';
+import { getStorageItem } from './storage';
 
 export interface Trip {
   _id: string;
@@ -140,15 +141,16 @@ export const copyTrip = async (tripId: string): Promise<Trip> => {
 
 export const deleteTrip = async (tripId: string): Promise<void> => {
   try {
-    await axios.delete('/trips/delete', { params: { id: tripId } });
+    await axios.delete(`/trips/${tripId}`);
     Toast.show({
       type: 'success',
-      text1: 'Trip deleted successfully',
+      text1: 'Trip deleted successfully'
     });
   } catch (error: any) {
+    const errorMessage = error.response?.data?.message || 'Failed to delete trip';
     Toast.show({
       type: 'error',
-      text1: 'Failed to delete trip',
+      text1: errorMessage
     });
     throw error;
   }
@@ -243,14 +245,44 @@ export const searchTrips = async (query: string): Promise<Trip[]> => {
   }
 };
 
-export const getMyTrips = async (): Promise<Trip[]> => {
+export const getMyTrips = async (userId: string): Promise<Trip[]> => {
   try {
-    const response = await axios.post<Trip[]>('/trips/my-trips');
+    console.log('getMyTrips: Sending request with userId:', userId);
+    
+    const response = await axios.post<Trip[]>('/trips/my-trips', {
+      userId: userId // Send the userId in the request body
+    });
+    
+    console.log('getMyTrips: Response received:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('getMyTrips Error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
+    Toast.show({
+      type: 'error',
+      text1: 'Failed to fetch your trips',
+      text2: error.response?.data?.message || error.message
+    });
+    throw error;
+  }
+};
+
+export const joinTrip = async (tripId: string): Promise<{ message: string; trip?: any }> => {
+  try {
+    const response = await axios.post(`/trips/${tripId}/join`);
+    Toast.show({
+      type: 'success',
+      text1: 'Successfully joined the trip',
+    });
     return response.data;
   } catch (error: any) {
     Toast.show({
       type: 'error',
-      text1: 'Failed to fetch your trips'
+      text1: 'Failed to join trip',
+      text2: error.response?.data?.error || error.message,
     });
     throw error;
   }

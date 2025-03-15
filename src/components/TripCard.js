@@ -1,16 +1,24 @@
 // TripCard.jsx
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useContext } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { Ionicons, Feather } from '@expo/vector-icons';
+import { AuthContext } from '../navigation/AppNavigator';
 
-const TripCard = ({ trip, onPress }) => {
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = width / 3 - 12; // 3 cards per row with 8px gap
+const CARD_HEIGHT = CARD_WIDTH * 1.2; // Maintain aspect ratio
+
+const TripCard = ({ trip, style, onPress, showDeleteOption = false, onDelete }) => {
+  const { user } = useContext(AuthContext);
+  const isHost = user?.id === trip?.host?._id;
+
   // Use coverPhoto if available, otherwise use first photo from the photos array
   const photoUrl =
     trip.coverPhoto ||
     (trip.photos && trip.photos.length > 0 ? trip.photos[0].url : 'https://via.placeholder.com/200x120');
 
   return (
-    <TouchableOpacity onPress={onPress} style={styles.card}>
+    <TouchableOpacity style={[styles.card, style]} onPress={onPress}>
       <Image source={{ uri: photoUrl }} style={styles.image} />
       <View style={styles.overlay}>
         <View style={styles.textContainer}>
@@ -19,7 +27,7 @@ const TripCard = ({ trip, onPress }) => {
           </Text>
           <View style={styles.detailsContainer}>
             <View style={styles.detail}>
-              <Ionicons name="people-outline" size={16} color="#FFF" />
+              <Ionicons name="people-outline" size={12} color="#FFF" />
               <Text style={styles.detailText}>{trip.members?.length || 0}</Text>
             </View>
             <View style={styles.detail}>
@@ -30,6 +38,18 @@ const TripCard = ({ trip, onPress }) => {
             </View>
           </View>
         </View>
+        
+        {showDeleteOption && isHost && (
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              onDelete?.(trip);
+            }}
+          >
+            <Feather name="trash-2" size={20} color="#FFF" />
+          </TouchableOpacity>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -37,21 +57,21 @@ const TripCard = ({ trip, onPress }) => {
 
 const styles = StyleSheet.create({
   card: {
-    width: 280,
-    height: 180,
-    marginRight: 16,
-    borderRadius: 12,
+    width: CARD_WIDTH,
+    height: CARD_HEIGHT,
+    borderRadius: 8,
     overflow: 'hidden',
     backgroundColor: '#fff',
-    elevation: 3,
+    elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
   image: {
     width: '100%',
     height: '100%',
+    resizeMode: 'cover',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -59,13 +79,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   textContainer: {
-    padding: 12,
+    padding: 8,
   },
   title: {
-    fontSize: 18,
+    fontSize: 12,
     fontWeight: 'bold',
     color: '#FFF',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   detailsContainer: {
     flexDirection: 'row',
@@ -74,13 +94,21 @@ const styles = StyleSheet.create({
   detail: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 8,
   },
   detailText: {
     color: '#FFF',
-    marginLeft: 4,
-    fontSize: 14,
-  }
+    marginLeft: 2,
+    fontSize: 10,
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(255, 82, 82, 0.8)',
+    borderRadius: 20,
+    padding: 8,
+  },
 });
 
 export default TripCard;

@@ -160,8 +160,12 @@ export const updateBlogRating = async (id: string, value: number): Promise<BlogP
   }
 };
 
-export const searchBlogs = async (params: { query?: string; tags?: string[] }): Promise<BlogPost[]> => {
+export const searchBlogs = async (params: { 
+  query?: string; 
+  tags?: string[] 
+}): Promise<BlogPost[]> => {
   try {
+    console.log('Sending search request with params:', params); // Debug log
     const queryString = new URLSearchParams();
     if (params.query) {
       queryString.append('query', params.query);
@@ -171,11 +175,14 @@ export const searchBlogs = async (params: { query?: string; tags?: string[] }): 
     }
     
     const response = await axios.get<BlogPost[]>(`/blogs/search?${queryString}`);
+    console.log('Search response:', response.data); // Debug log
     return response.data;
   } catch (error: any) {
+    console.error('Search error:', error.response || error); // Debug log
     Toast.show({
       type: 'error',
-      text1: 'Failed to search blogs'
+      text1: 'Search failed',
+      text2: error.response?.data?.message || 'Failed to search blogs'
     });
     throw error;
   }

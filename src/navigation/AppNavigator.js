@@ -20,6 +20,9 @@ import { NotificationProvider } from '../context/NotificationContext';
 import CreateTripScreen from '../screens/CreateTripScreen';
 import InviteFriendsScreen from '../screens/InviteFriendsScreen';
 import TripItineraryFormScreen from '../screens/TripItineraryScreen';
+import AllBlogsScreen from '../screens/AllBlogsScreen';
+import OpenTripsScreen from '../screens/OpenTripsScreen';
+import ChatRoomScreen from '../screens/ChatRoomScreen';
 
 export const navigationRef = createNavigationContainerRef();
 export const AuthContext = createContext({
@@ -93,6 +96,14 @@ const AppNavigator = () => {
     checkAuth();
   }, []);
 
+  useEffect(() => {
+    console.log('AppNavigator Auth State:', {
+      isAuthenticated,
+      hasUser: !!user,
+      userData: user
+    });
+  }, [isAuthenticated, user]);
+
   const authContextValue = {
     isAuthenticated,
     user,
@@ -125,9 +136,14 @@ const AppNavigator = () => {
                 <Stack.Screen name="DayItinerary" component={DayItenaryScreen} />
                 <Stack.Screen name="PhotoUpload" component={PhotoUploadScreen} />
                 <Stack.Screen name="TripItinerary" component={TripItineraryScreen} />
-                <Stack.Screen name="CreateTrip" component={CreateTripScreen} />
                 <Stack.Screen name="InviteFriends" component={InviteFriendsScreen} />
-                {/* <Stack.Screen name="TripItineraryForm" component={TripItineraryFormScreen} /> */}
+                <Stack.Screen name="AllBlogs" component={AllBlogsScreen} />
+                <Stack.Screen name="OpenTrips" component={OpenTripsScreen} />
+                <Stack.Screen 
+                  name="ChatRoom" 
+                  component={ChatRoomScreen}
+                  options={{ headerShown: false }}
+                />
               </>
             ) : (
               <>
