@@ -28,6 +28,8 @@
     "expo-dev-client": "~5.0.12",
     "expo-font": "~13.0.4",
     "expo-haptics": "~14.0.1",
+    "expo-image-picker": "~16.0.6",
+    "expo-linear-gradient": "^14.0.2",
     "expo-linking": "~7.0.5",
     "expo-splash-screen": "~0.29.22",
     "expo-status-bar": "~2.0.1",
@@ -55,8 +57,7 @@
     "react-native-webview": "13.12.5",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.2.0",
-    "redux": "^5.0.1",
-    "expo-image-picker": "~16.0.6"
+    "redux": "^5.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

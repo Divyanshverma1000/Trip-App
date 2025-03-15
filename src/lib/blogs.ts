@@ -23,26 +23,47 @@ export interface BlogPost {
     name: string;
     email: string;
   };
-  caption?: string;
+  title: string;
+  summary?: string;
+  description?: string;
+  coverPhoto?: string;
   photos: Photo[];
-  content?: string;
   ratings: Rating[];
   createdAt: string;
   updatedAt: string;
 }
 
+export interface Answer {
+  answeredBy: {
+    _id: string;
+    name: string;
+    email: string;
+    profilePic?: string;
+  };
+  answerText: string;
+  createdAt: string;
+}
+
+export interface Question {
+  _id: string;
+  blog: string;
+  askedBy: {
+    _id: string;
+    name: string;
+    email: string;
+    profilePic?: string;
+  };
+  questionText: string;
+  answers: Answer[];
+  createdAt: string;
+}
+
 export const createBlogPost = async (
   tripId: string,
-  // caption: string,
-  // photos: Array<{ url: string; caption?: string }>,
-  // content: string
 ): Promise<BlogPost> => {
   try {
     const response = await axios.post<BlogPost>('/blogs', {
       tripId,
-      // caption,
-      // photos,
-      
     });
     Toast.show({
       type: 'success',
@@ -165,7 +186,7 @@ export const searchBlogs = async (params: {
   tags?: string[] 
 }): Promise<BlogPost[]> => {
   try {
-    console.log('Sending search request with params:', params); // Debug log
+    console.log('Sending search request with params:', params);
     const queryString = new URLSearchParams();
     if (params.query) {
       queryString.append('query', params.query);
@@ -175,14 +196,61 @@ export const searchBlogs = async (params: {
     }
     
     const response = await axios.get<BlogPost[]>(`/blogs/search?${queryString}`);
-    console.log('Search response:', response.data); // Debug log
+    console.log('Search response:', response.data);
     return response.data;
   } catch (error: any) {
-    console.error('Search error:', error.response || error); // Debug log
+    console.error('Search error:', error.response || error);
     Toast.show({
       type: 'error',
       text1: 'Search failed',
       text2: error.response?.data?.message || 'Failed to search blogs'
+    });
+    throw error;
+  }
+};
+
+export const askQuestion = async (blogId: string, questionText: string): Promise<Question> => {
+  try {
+    const response = await axios.post<Question>('/questions/ask', { blogId, questionText });
+    Toast.show({
+      type: 'success',
+      text1: 'Question posted successfully'
+    });
+    return response.data;
+  } catch (error: any) {
+    Toast.show({
+      type: 'error',
+      text1: 'Failed to ask question'
+    });
+    throw error;
+  }
+};
+
+export const answerQuestion = async (questionId: string, answerText: string): Promise<Question> => {
+  try {
+    const response = await axios.post<Question>(`/questions/${questionId}/answer`, { answerText });
+    Toast.show({
+      type: 'success',
+      text1: 'Answer submitted successfully'
+    });
+    return response.data;
+  } catch (error: any) {
+    Toast.show({
+      type: 'error',
+      text1: 'Failed to submit answer'
+    });
+    throw error;
+  }
+};
+
+export const getQuestions = async (blogId: string): Promise<Question[]> => {
+  try {
+    const response = await axios.get<Question[]>(`/questions/blog/${blogId}`);
+    return response.data;
+  } catch (error: any) {
+    Toast.show({
+      type: 'error',
+      text1: 'Failed to fetch questions'
     });
     throw error;
   }
