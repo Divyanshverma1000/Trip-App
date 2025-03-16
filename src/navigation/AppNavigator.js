@@ -24,6 +24,9 @@ import AllBlogsScreen from '../screens/AllBlogsScreen';
 import OpenTripsScreen from '../screens/OpenTripsScreen';
 import ChatRoomScreen from '../screens/ChatRoomScreen';
 import ItineraryPlanningScreen from '../screens/ItineraryPlanningScreen';
+import CreateBlogNavigator from './CreateBlogNavigator';
+import FeedScreen from '../screens/FeedScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 export const navigationRef = createNavigationContainerRef();
 export const AuthContext = createContext({
   isAuthenticated: false,
@@ -140,11 +143,21 @@ const AppNavigator = () => {
                 <Stack.Screen name="AllBlogs" component={AllBlogsScreen} />
                 <Stack.Screen name="OpenTrips" component={OpenTripsScreen} />
                 <Stack.Screen name="ItineraryPlanning" component={ItineraryPlanningScreen} />
+                <Stack.Screen name="CreateTrip" component={CreateTripScreen} />
+                <Stack.Screen name="Feed" component={FeedScreen} />
+                <Stack.Screen name="Profile" component={ProfileScreen} />
                 <Stack.Screen 
                   name="ChatRoom" 
                   component={ChatRoomScreen}
                   options={{ headerShown: false }}
                 />
+              
+                <Stack.Screen 
+                  name="CreateBlog" 
+                  component={CreateBlogNavigator}
+                  options={{ headerShown: false }}
+                />
+    
               </>
             ) : (
               <>

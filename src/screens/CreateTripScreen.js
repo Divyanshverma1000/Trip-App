@@ -138,12 +138,12 @@ const CreateTripScreen = ({ navigation }) => {
     additionalPhotos.forEach((photo, index) => {
       const fileName = photo.uri.split('/').pop();
       const fileType = 'image/' + (fileName.split('.').pop() || 'jpeg');
-      formData.append(`photos`, {
+      formData.append(`tripPhotos`, {
         uri: photo.uri,
         name: fileName,
         type: fileType
       });
-      formData.append(`photosCaptions`, photo.caption || '');
+      // formData.append(`photosCaptions`, photo.caption || '');
     });
 
     try {
@@ -154,7 +154,7 @@ const CreateTripScreen = ({ navigation }) => {
         text1: 'Basic trip details saved!'
       });
       // navigation.navigate('ItineraryPlanning', { tripId: createdTrip._id });
-      navigation.navigate('Profile', { refresh: true });
+      navigation.navigate('Profile');
     } catch (error) {
       console.error('Failed to create trip:', error);
       Toast.show({

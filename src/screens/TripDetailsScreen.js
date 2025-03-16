@@ -9,6 +9,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  FlatList
 } from 'react-native';
 import Animated, { useSharedValue, FadeInUp } from 'react-native-reanimated';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -190,6 +191,36 @@ const TripDetailsScreen = () => {
         <View style={styles.contentPadding} />
         <View style={styles.content}>
           <Text style={styles.description}>{trip.description}</Text>
+
+          {/* Trip Photos Gallery */}
+          {trip.tripPhotos?.length > 0 && (
+            <View style={styles.photoGalleryCard}>
+              <Text style={styles.sectionTitle}>
+                <MaterialIcons name="photo-library" size={24} color="#6366F1" />
+                {' Trip Photos'}
+              </Text>
+              <FlatList
+                data={trip.tripPhotos}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity 
+                    // onPress={() => navigation.navigate('PhotoView', { photos: trip.tripPhotos })}
+                  >
+                    <Image
+                      source={{ uri: item.url }}
+                      style={styles.galleryPhoto}
+                      loading="lazy"
+                    />
+                    {item.caption && (
+                      <Text style={styles.photoCaption}>{item.caption}</Text>
+                    )}
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          )}
 
           {/* Add Edit Itinerary Button only for users with access */}
           {hasEditAccess && (
@@ -528,6 +559,24 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     lineHeight: 24,
     color: '#374151'
+  },
+  photoGalleryCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+  },
+  galleryPhoto: {
+    width: 200,
+    height: 150,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  photoCaption: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 4,
+    width: 200,
   },
   highlightCard: {
     backgroundColor: '#fff',
