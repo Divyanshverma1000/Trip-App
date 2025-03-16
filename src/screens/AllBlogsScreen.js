@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
 import {
   View,
   FlatList,
@@ -6,12 +6,12 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   RefreshControl,
-  Text
-} from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import BlogCard from '../components/BlogCard';
-import { getBlogPosts } from '../lib/blogs';
-import { useNavigation } from '@react-navigation/native';
+  Text,
+} from "react-native";
+import { Feather } from "@expo/vector-icons";
+import BlogCard from "../components/BlogCard";
+import { getBlogPosts } from "../lib/blogs";
+import { useNavigation } from "@react-navigation/native";
 
 const AllBlogsScreen = () => {
   const navigation = useNavigation();
@@ -25,7 +25,7 @@ const AllBlogsScreen = () => {
       const data = await getBlogPosts();
       setBlogs(data);
     } catch (error) {
-      console.error('Error fetching blogs:', error);
+      console.error("Error fetching blogs:", error);
     } finally {
       setLoading(false);
     }
@@ -41,10 +41,22 @@ const AllBlogsScreen = () => {
     fetchBlogs();
   }, [fetchBlogs]);
 
+  const trendingBlogs = blogs
+    .filter((blog) => blog.ratings && blog.ratings.length > 0)
+    .map((blog) => {
+      const avgRating =
+        blog.ratings.reduce((sum, rating) => sum + rating.value, 0) /
+        blog.ratings.length;
+      return { ...blog, averageRating: avgRating };
+    })
+    .sort((a, b) => b.averageRating - a.averageRating);
+
   const renderBlogCard = ({ item }) => (
     <BlogCard
       blog={item}
-      onPress={() => navigation.navigate('BlogDetailsScreen', { blogId: item._id })}
+      onPress={() =>
+        navigation.navigate("BlogDetailsScreen", { blogId: item._id })
+      }
       style={styles.blogCard}
     />
   );
@@ -68,7 +80,7 @@ const AllBlogsScreen = () => {
         <ActivityIndicator style={styles.loader} size="large" color="#4CAF50" />
       ) : (
         <FlatList
-          data={blogs}
+          data={trendingBlogs}
           renderItem={renderBlogCard}
           keyExtractor={(item) => item._id}
           contentContainerStyle={styles.listContainer}
@@ -86,17 +98,17 @@ const AllBlogsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    backgroundColor: '#fff',
+    borderBottomColor: "#eee",
+    backgroundColor: "#fff",
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -105,13 +117,13 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   headerTitle: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginLeft: 16,
   },
   headerText: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginLeft: 8,
   },
   listContainer: {
@@ -122,9 +134,9 @@ const styles = StyleSheet.create({
   },
   loader: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
-export default AllBlogsScreen; 
+export default AllBlogsScreen;
