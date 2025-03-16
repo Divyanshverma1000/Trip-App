@@ -136,6 +136,7 @@ const AppNavigator = () => {
                 <Stack.Screen name="DayItinerary" component={DayItenaryScreen} />
                 <Stack.Screen name="PhotoUpload" component={PhotoUploadScreen} />
                 <Stack.Screen name="TripItinerary" component={TripItineraryScreen} />
+                <Stack.Screen name="ChatRoomScreen" component={ChatRoomScreen} />
                 <Stack.Screen name="InviteFriends" component={InviteFriendsScreen} />
                 <Stack.Screen name="AllBlogs" component={AllBlogsScreen} />
                 <Stack.Screen name="OpenTrips" component={OpenTripsScreen} />

@@ -12,7 +12,7 @@ const Tab = createBottomTabNavigator();
 
 const ICONS = {
   Home: "home-outline",
-  Feed: "newspaper-outline", // Use this icon for Feed
+  Feed: "newspaper-outline",
   CreateTrip: "add-circle",
   GroupChat: "chatbubble-ellipses-outline",
   Profile: "person-outline",

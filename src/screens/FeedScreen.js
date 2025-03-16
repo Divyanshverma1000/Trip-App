@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
 import {
+  SafeAreaView,
   View,
   Text,
   FlatList,
-  StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
   Image,
   Dimensions,
   ScrollView,
   StatusBar,
-  SafeAreaView,
+  StyleSheet,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { getBlogPosts } from "../lib/blogs";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons, FontAwesome5, Ionicons } from "@expo/vector-icons";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.9;
@@ -28,17 +28,14 @@ const FILTER_OPTIONS = [
   { label: "Accessibility", value: "accessibility" },
 ];
 
-// Helper to format the date
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   const now = new Date();
   const diffMs = now - date;
-  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   if (diffDays < 7) {
-    const daysRounded = Math.floor(diffDays);
-    return daysRounded <= 0
-      ? "Today"
-      : `${daysRounded} day${daysRounded > 1 ? "s" : ""} ago`;
+    if (diffDays <= 0) return "Today";
+    return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
   }
   return date.toLocaleDateString("en-US", {
     month: "short",
@@ -46,6 +43,14 @@ const formatDate = (dateString) => {
     year: "numeric",
   });
 };
+
+const ProfilePlaceholder = ({ name }) => (
+  <View style={styles.profilePlaceholder}>
+    <Text style={styles.profilePlaceholderText}>
+      {name.charAt(0).toUpperCase()}
+    </Text>
+  </View>
+);
 
 const FeedScreen = () => {
   const [blogs, setBlogs] = useState([]);
@@ -68,7 +73,6 @@ const FeedScreen = () => {
     fetchBlogs();
   }, []);
 
-  // Filtering functions based on selectedFilter value
   const getFilteredBlogs = () => {
     if (selectedFilter === "all") {
       return blogs
@@ -87,6 +91,7 @@ const FeedScreen = () => {
         return avgB - avgA;
       });
     }
+    // Filter by concerns value
     return blogs
       .filter(
         (blog) => blog.concerns && blog.concerns[selectedFilter] !== undefined
@@ -105,12 +110,12 @@ const FeedScreen = () => {
           ).toFixed(1)
         : null;
 
-    const maxSummaryLength = 100;
     const summaryText =
-      item.summary && item.summary.length > maxSummaryLength
-        ? item.summary.substring(0, maxSummaryLength) + "..."
+      item.summary && item.summary.length > 100
+        ? item.summary.substring(0, 100) + "..."
         : item.summary;
 
+    const tags = item.tags || [];
     const concerns = item.concerns || {};
 
     return (
@@ -120,40 +125,44 @@ const FeedScreen = () => {
           navigation.navigate("BlogDetailsScreen", { blogId: item._id })
         }
       >
-        {/* Card Header: Host info */}
+        {/* Card Header */}
         <View style={styles.cardHeader}>
-          <Image
-            source={{
-              uri: item.host.profilePic || "https://via.placeholder.com/40",
-            }}
-            style={styles.profilePic}
-          />
+          {item.host.profilePic ? (
+            <Image
+              source={{ uri: item.host.profilePic }}
+              style={styles.profilePic}
+            />
+          ) : (
+            <ProfilePlaceholder name={item.host.name} />
+          )}
           <View style={styles.headerInfo}>
             <Text style={styles.hostName}>{item.host.name}</Text>
             <Text style={styles.timeText}>{formatDate(item.createdAt)}</Text>
           </View>
         </View>
 
-        {/* Blog Content */}
+        {/* Card Content */}
         <View style={styles.cardContent}>
           <Text style={styles.title}>{item.title}</Text>
 
-          {item.coverPhoto && (
+          {item.coverPhoto ? (
             <Image
               source={{ uri: item.coverPhoto }}
               style={styles.coverPhoto}
               resizeMode="cover"
             />
+          ) : (
+            <View style={styles.coverPlaceholder}>
+              <Ionicons name="image-outline" size={50} color="#BDBDBD" />
+              <Text style={styles.placeholderText}>No Cover Photo</Text>
+            </View>
           )}
 
-          {summaryText ? (
-            <Text style={styles.summary}>{summaryText}</Text>
-          ) : null}
+          {summaryText && <Text style={styles.summary}>{summaryText}</Text>}
 
-          {/* Tags */}
-          {item.tags && item.tags.length > 0 && (
+          {tags.length > 0 && (
             <View style={styles.tagsContainer}>
-              {item.tags.map((tag, index) => (
+              {tags.map((tag, index) => (
                 <View key={index} style={styles.tagBadge}>
                   <Text style={styles.tagText}>{tag}</Text>
                 </View>
@@ -162,15 +171,12 @@ const FeedScreen = () => {
           )}
 
           <View style={styles.cardFooter}>
-            {/* Rating display */}
             {avgRating && (
               <View style={styles.ratingContainer}>
                 <MaterialIcons name="star" size={16} color="#FFD700" />
                 <Text style={styles.avgRatingText}>{avgRating}</Text>
               </View>
             )}
-
-            {/* Concerns badges */}
             <View style={styles.concernsBadges}>
               {Object.entries(concerns).map(([key, value], index) =>
                 value > 3 ? (
@@ -207,12 +213,11 @@ const FeedScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#388E3C" />
-      {/* Creative Header */}
+
+      {/* Header */}
       <View style={styles.feedHeader}>
-        <View style={styles.headerContent}>
-          <Text style={styles.feedHeaderText}>Discover</Text>
-          <Text style={styles.feedSubheaderText}>Travel Stories</Text>
-        </View>
+        <Text style={styles.feedHeaderText}>Discover</Text>
+        <Text style={styles.feedSubheaderText}>Travel Stories</Text>
       </View>
 
       {/* Filter Tabs */}
@@ -267,74 +272,47 @@ const FeedScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  container: { flex: 1, backgroundColor: "#f5f5f5" },
+  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   feedHeader: {
+    backgroundColor: "#388E3C",
     paddingVertical: 20,
     paddingHorizontal: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#4CAF50",
     elevation: 4,
-  },
-  headerContent: {
-    flexDirection: "column",
   },
   feedHeaderText: {
     color: "#fff",
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "bold",
   },
   feedSubheaderText: {
     color: "rgba(255,255,255,0.9)",
-    fontSize: 16,
-    marginTop: 2,
+    fontSize: 18,
+    marginTop: 4,
   },
   tabsWrapper: {
     backgroundColor: "#fff",
     elevation: 2,
   },
-  tabsContainer: {
-    paddingVertical: 12,
-  },
-  tabsContentContainer: {
-    paddingHorizontal: 16,
-  },
+  tabsContainer: { paddingVertical: 12 },
+  tabsContentContainer: { paddingHorizontal: 16 },
   tab: {
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
     marginRight: 10,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#e0e0e0",
   },
-  activeTab: {
-    backgroundColor: "#4CAF50",
-  },
-  tabText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#4CAF50",
-  },
-  activeTabText: {
-    color: "#fff",
-  },
-  listContainer: {
-    padding: 12,
-    paddingBottom: 20,
-  },
+  activeTab: { backgroundColor: "#388E3C" },
+  tabText: { fontSize: 16, fontWeight: "500", color: "#388E3C" },
+  activeTabText: { color: "#fff" },
+  listContainer: { padding: 12, paddingBottom: 20 },
   card: {
     backgroundColor: "#fff",
     borderRadius: 16,
     marginBottom: 16,
-    padding: 12,
+    padding: 16,
     elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -343,36 +321,19 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     alignSelf: "center",
   },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
+  cardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
   profilePic: {
     width: 40,
     height: 40,
     borderRadius: 20,
     backgroundColor: "#e0e0e0",
   },
-  headerInfo: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  hostName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#212121",
-  },
-  timeText: {
-    fontSize: 12,
-    color: "#757575",
-    marginTop: 2,
-  },
-  cardContent: {
-    flex: 1,
-  },
+  headerInfo: { marginLeft: 12, flex: 1 },
+  hostName: { fontSize: 16, fontWeight: "600", color: "#212121" },
+  timeText: { fontSize: 12, color: "#757575", marginTop: 2 },
+  cardContent: { flex: 1 },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     marginBottom: 12,
     color: "#212121",
@@ -383,30 +344,27 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 12,
   },
-  summary: {
-    fontSize: 14,
-    color: "#424242",
-    lineHeight: 20,
+  coverPlaceholder: {
+    width: "100%",
+    height: 180,
+    backgroundColor: "#E0E0E0",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 12,
     marginBottom: 12,
   },
-  tagsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginBottom: 12,
-  },
+  placeholderText: { color: "#757575", fontSize: 14, marginTop: 6 },
+  summary: { fontSize: 16, color: "#424242", lineHeight: 22, marginBottom: 12 },
+  tagsContainer: { flexDirection: "row", flexWrap: "wrap", marginBottom: 12 },
   tagBadge: {
-    backgroundColor: "#eee",
+    backgroundColor: "#E8F5E9",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 20,
     marginRight: 8,
     marginBottom: 8,
   },
-  tagText: {
-    fontSize: 12,
-    color: "#4CAF50",
-    fontWeight: "500",
-  },
+  tagText: { fontSize: 12, color: "#388E3C", fontWeight: "500" },
   cardFooter: {
     flexDirection: "row",
     alignItems: "center",
@@ -427,10 +385,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     color: "#FF8F00",
   },
-  concernsBadges: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
+  concernsBadges: { flexDirection: "row", flexWrap: "wrap" },
   badge: {
     backgroundColor: "#E8F5E9",
     paddingHorizontal: 8,
@@ -438,20 +393,25 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginLeft: 6,
   },
-  badgeText: {
-    fontSize: 12,
-    color: "#388E3C",
-    fontWeight: "500",
-  },
+  badgeText: { fontSize: 12, color: "#388E3C", fontWeight: "500" },
   emptyContainer: {
     alignItems: "center",
     justifyContent: "center",
     padding: 40,
   },
-  emptyText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: "#757575",
+  emptyText: { marginTop: 12, fontSize: 16, color: "#757575" },
+  profilePlaceholder: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#757575",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  profilePlaceholderText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 
