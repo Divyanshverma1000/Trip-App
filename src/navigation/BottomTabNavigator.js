@@ -32,7 +32,7 @@ const CreateTripButton = ({ focused }) => (
       focused && styles.tabLabelFocused,
       styles.createTripLabel
     ]}>
-      Create
+      Trip
     </Text>
   </View>
 );

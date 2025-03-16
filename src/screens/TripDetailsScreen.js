@@ -147,7 +147,7 @@ const TripDetailsScreen = () => {
           {isHost && (
             <TouchableOpacity
               style={styles.inviteButton}
-              onPress={() => navigation.navigate('InviteFriends', { tripId: trip._id })}
+              onPress={() => navigation.navigate('InviteFriends', { tripData: trip})}
             >
               <Feather name="user-plus" size={24} color="#FFF" />
               <Text style={styles.inviteButtonText}>Invite Friends</Text>
@@ -365,6 +365,46 @@ const TripDetailsScreen = () => {
                     <Text style={styles.contactButtonText}> Contact Host</Text>
                   </TouchableOpacity>
                 </View>
+              </View>
+            </View>
+          )}
+          {/* Trip Members */}
+          {trip.members?.length > 0 && (
+            <View style={styles.card}>
+              <Text style={styles.sectionTitle}>
+                <MaterialIcons name="people" size={24} color="#6366F1" />
+                {' Trip Members'}
+              </Text>
+              <View style={styles.membersContainer}>
+                {trip.members.map((member) => (
+                  <View 
+                    key={member.user._id} 
+                    style={[
+                      styles.memberItem,
+                      member.user._id === trip.host._id && styles.hostMemberItem
+                    ]}
+                  >
+                    <Image 
+                      source={{ uri: member.user.photo }} 
+                      style={styles.memberPhoto} 
+                    />
+                    <View style={styles.memberInfo}>
+                      <Text style={styles.memberName}>
+                        {member.user.name}
+                        {member.user._id === trip.host._id && (
+                          <Text style={styles.hostBadge}> (Host)</Text>
+                        )}
+                      </Text>
+                      <Text style={[
+                        styles.memberStatus,
+                        member.status === 'accepted' && styles.acceptedStatus,
+                        member.status === 'pending' && styles.pendingStatus
+                      ]}>
+                        {member.status}
+                      </Text>
+                    </View>
+                  </View>
+                ))}
               </View>
             </View>
           )}
@@ -747,6 +787,49 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 8,
   },
+  membersContainer: {
+    marginTop: 8
+  },
+  memberItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8
+  },
+  hostMemberItem: {
+    backgroundColor: '#EEF2FF'
+  },
+  memberPhoto: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12
+  },
+  memberInfo: {
+    flex: 1
+  },
+  memberName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 4
+  },
+  hostBadge: {
+    color: '#6366F1',
+    fontWeight: '500'
+  },
+  memberStatus: {
+    fontSize: 14,
+    textTransform: 'capitalize'
+  },
+  acceptedStatus: {
+    color: '#059669'
+  },
+  pendingStatus: {
+    color: '#D97706'
+  }
 });
 
 export default TripDetailsScreen;

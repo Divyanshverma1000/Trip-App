@@ -6,14 +6,17 @@ import {
   TouchableOpacity,
   FlatList,
   StyleSheet,
-  ActivityIndicator
+  ActivityIndicator,
+  Image
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { searchUsers as searchUsersApi } from '../lib/user';
+import { inviteToTrip } from '../lib/trips';
 import Toast from 'react-native-toast-message';
 
 const InviteFriendsScreen = ({ navigation, route }) => {
   const { tripData } = route.params;
+  console.log('Trip data:', tripData);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
@@ -49,33 +52,59 @@ const InviteFriendsScreen = ({ navigation, route }) => {
     }
   };
 
-  const handleNext = () => {
-    const updatedTripData = {
-      ...tripData,
-      members: selectedUsers.map(user => ({
-        user: user._id,
-        role: 'member',
-        status: 'pending'
-      })),
-      isPublic: false
-    };
-    navigation.navigate('TripItineraryForm', { tripData: updatedTripData });
+  const handleNext = async () => {
+    console.log('Selected users:', selectedUsers);
+    try {
+      // Send invite requests to selected users using inviteToTrip function
+      await Promise.all(selectedUsers.map(user => 
+        inviteToTrip(tripData._id, user._id)
+      ));
+      console.log('Invites sent successfully');
+      // Navigate back to trip details screen
+      navigation.navigate('TripDetailsScreen', { 
+        tripId: tripData._id,
+        refresh: true // Trigger refresh to show new members
+      });
+      console.log('Navigated to trip details screen');
+
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to send invites',
+        text2: error.message
+      });
+      console.log('Failed to send invites', error);
+    }
   };
 
   const renderUser = ({ item }) => {
     const isSelected = selectedUsers.find(u => u._id === item._id);
     
     return (
-      <TouchableOpacity
-        style={[styles.userItem, isSelected && styles.selectedUser]}
-        onPress={() => toggleUserSelection(item)}
-      >
-        <Text style={styles.userName}>{item.name}</Text>
-        <Text style={styles.userEmail}>{item.email}</Text>
-        {isSelected && (
-          <Feather name="check" size={20} color="#4CAF50" />
-        )}
-      </TouchableOpacity>
+      <View style={styles.userItem}>
+        <View style={styles.userInfoContainer}>
+          <Image 
+            source={{ uri: item.photo || 'https://picsum.photos/200/300' }}
+            style={styles.profilePhoto}
+          />
+          <View style={styles.textContainer}>
+            <Text style={styles.userName}>{item.name}</Text>
+            <Text style={styles.userEmail}>{item.email}</Text>
+          </View>
+        </View>
+        
+        <TouchableOpacity
+          style={[styles.inviteButton, isSelected && styles.selectedButton]}
+          onPress={() => toggleUserSelection(item)}
+        >
+          <Text style={[styles.inviteButtonText, isSelected && styles.selectedButtonText]}>
+            {isSelected ? 'Selected' : 'Invite'}
+          </Text>
+          {isSelected && (
+            <Feather name="check" size={20} color="#FFF" style={styles.checkIcon} />
+          )}
+        </TouchableOpacity>
+      </View>
     );
   };
 
@@ -141,6 +170,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginLeft: 16,
+    fontFamily: 'Roboto',
   },
   searchContainer: {
     flexDirection: 'row',
@@ -155,6 +185,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
+    fontFamily: 'Roboto',
   },
   loader: {
     marginTop: 20,
@@ -170,16 +201,54 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  selectedUser: {
-    backgroundColor: '#E8F5E9',
+  userInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  profilePhoto: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+  },
+  textContainer: {
+    flex: 1,
   },
   userName: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
+    fontFamily: 'Roboto',
+    color: '#333',
+    marginBottom: 4,
   },
   userEmail: {
     fontSize: 14,
     color: '#666',
+    fontFamily: 'Roboto',
+  },
+  inviteButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  selectedButton: {
+    backgroundColor: '#2E7D32',
+  },
+  inviteButtonText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'Roboto',
+  },
+  selectedButtonText: {
+    marginRight: 4,
+  },
+  checkIcon: {
+    marginLeft: 4,
   },
   footer: {
     padding: 16,
@@ -190,6 +259,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginBottom: 8,
+    fontFamily: 'Roboto',
   },
   nextButton: {
     backgroundColor: '#4CAF50',
@@ -204,7 +274,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginRight: 8,
+    fontFamily: 'Roboto',
   },
 });
 
-export default InviteFriendsScreen; 
+export default InviteFriendsScreen;

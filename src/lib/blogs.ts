@@ -15,35 +15,61 @@ export interface Rating {
   value: number;
 }
 
+export interface ContactInfo {
+  label?: string;
+  phone?: string;
+  email?: string;
+}
+
+export interface Concerns {
+  womenSafety?: number;
+  affordability?: number;
+  culturalExperience?: number;
+  accessibility?: number;
+}
+
 export interface BlogPost {
   _id: string;
-  trip: string;
+  trip?: string;
   host: {
     _id: string;
     name: string;
     email: string;
   };
-  caption?: string;
+  title: string;
+  summary?: string;
+  description?: string;
+  recommendations?: string;
+  advisory?: string;
+  coverPhoto?: string;
   photos: Photo[];
-  content?: string;
+  contactInfo: ContactInfo[];
+  tags: string[];
+  budget?: number;
+  concerns?: Concerns;
   ratings: Rating[];
   createdAt: string;
   updatedAt: string;
 }
 
-export const createBlogPost = async (
-  tripId: string,
-  // caption: string,
-  // photos: Array<{ url: string; caption?: string }>,
-  // content: string
-): Promise<BlogPost> => {
+export interface CreateBlogPostData {
+  tripId?: string;
+  title: string;
+  summary?: string;
+  description?: string;
+  recommendations?: string;
+  advisory?: string;
+  coverPhoto?: string;
+  photos?: Photo[];
+  contactInfo?: ContactInfo[];
+  tags?: string[];
+  budget?: number;
+  concerns?: Concerns;
+}
+
+export const createBlogPost = async (blogData: CreateBlogPostData): Promise<BlogPost> => {
   try {
-    const response = await axios.post<BlogPost>('/blogs', {
-      tripId,
-      // caption,
-      // photos,
-      
-    });
+    const response = await axios.post<BlogPost>('/blogs', blogData);
     Toast.show({
       type: 'success',
       text1: 'Blog post created successfully'
@@ -88,11 +114,7 @@ export const getBlogPostById = async (id: string): Promise<BlogPost> => {
 
 export const updateBlogPost = async (
   id: string,
-  updates: {
-    caption?: string;
-    photos?: Photo[];
-    content?: string;
-  }
+  updates: Partial<CreateBlogPostData>
 ): Promise<BlogPost> => {
   try {
     const response = await axios.put<BlogPost>(`/blogs/${id}`, updates);
@@ -128,6 +150,9 @@ export const deleteBlogPost = async (id: string): Promise<void> => {
 
 export const rateBlogPost = async (id: string, value: number): Promise<BlogPost> => {
   try {
+    if (value < 1 || value > 5) {
+      throw new Error('Rating must be between 1 and 5');
+    }
     const response = await axios.post<BlogPost>(`/blogs/${id}/rate`, { value });
     Toast.show({
       type: 'success',
@@ -137,7 +162,8 @@ export const rateBlogPost = async (id: string, value: number): Promise<BlogPost>
   } catch (error: any) {
     Toast.show({
       type: 'error',
-      text1: 'Failed to submit rating'
+      text1: 'Failed to submit rating',
+      text2: error.message
     });
     throw error;
   }
@@ -145,6 +171,9 @@ export const rateBlogPost = async (id: string, value: number): Promise<BlogPost>
 
 export const updateBlogRating = async (id: string, value: number): Promise<BlogPost> => {
   try {
+    if (value < 1 || value > 5) {
+      throw new Error('Rating must be between 1 and 5');
+    }
     const response = await axios.put<BlogPost>(`/blogs/${id}/rate`, { value });
     Toast.show({
       type: 'success',
@@ -154,7 +183,8 @@ export const updateBlogRating = async (id: string, value: number): Promise<BlogP
   } catch (error: any) {
     Toast.show({
       type: 'error',
-      text1: 'Failed to update rating'
+      text1: 'Failed to update rating',
+      text2: error.message
     });
     throw error;
   }
@@ -165,7 +195,6 @@ export const searchBlogs = async (params: {
   tags?: string[] 
 }): Promise<BlogPost[]> => {
   try {
-    console.log('Sending search request with params:', params); // Debug log
     const queryString = new URLSearchParams();
     if (params.query) {
       queryString.append('query', params.query);
@@ -175,10 +204,9 @@ export const searchBlogs = async (params: {
     }
     
     const response = await axios.get<BlogPost[]>(`/blogs/search?${queryString}`);
-    console.log('Search response:', response.data); // Debug log
     return response.data;
   } catch (error: any) {
-    console.error('Search error:', error.response || error); // Debug log
+    console.error('Search error:', error.response || error);
     Toast.show({
       type: 'error',
       text1: 'Search failed',

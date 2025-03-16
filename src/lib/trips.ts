@@ -156,33 +156,35 @@ export const deleteTrip = async (tripId: string): Promise<void> => {
   }
 };
 
-export const inviteToTrip = async (tripId: string, userId: string): Promise<void> => {
+export const inviteToTrip = async (tripId: string, memberId: string): Promise<void> => {
   try {
-    await axios.post('/trips/invite', { tripId, userId });
+    await axios.post(`/trips/${tripId}/invite`, { memberId });
     Toast.show({
       type: 'success',
       text1: 'Invitation sent successfully',
     });
   } catch (error: any) {
+    const errorMessage = error.response?.data?.message || 'Failed to send invitation';
     Toast.show({
       type: 'error',
-      text1: 'Failed to send invitation',
+      text1: errorMessage
     });
     throw error;
   }
 };
 
-export const respondToInvitation = async (tripId: string, responseStr: 'accept' | 'decline'): Promise<void> => {
+export const respondToInvitation = async (tripId: string, action: 'accept' | 'reject'): Promise<void> => {
   try {
-    await axios.post('/trips/respond-to-invitation', { tripId, response: responseStr });
+    await axios.post(`/trips/${tripId}/respond`, { action });
     Toast.show({
       type: 'success',
-      text1: `Invitation ${responseStr}ed successfully`,
+      text1: `Invitation ${action}ed successfully`,
     });
   } catch (error: any) {
+    const errorMessage = error.response?.data?.message || `Failed to ${action} invitation`;
     Toast.show({
       type: 'error',
-      text1: 'Failed to respond to invitation',
+      text1: errorMessage
     });
     throw error;
   }
