@@ -147,12 +147,16 @@ const ProfileScreen = () => {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      // Fetch updated user profile data
-      const updatedProfile = await getProfile();
+      // Fetch updated user profile data and trips simultaneously
+      const [updatedProfile] = await Promise.all([
+        getProfile(),
+        fetchMyTrips()
+      ]);
+      
       updateUser(updatedProfile);
       Toast.show({
         type: 'success',
-        text1: 'Profile updated',
+        text1: 'Profile and trips updated',
       });
     } catch (error) {
       Toast.show({
@@ -163,7 +167,7 @@ const ProfileScreen = () => {
     } finally {
       setRefreshing(false);
     }
-  }, [updateUser]);
+  }, [updateUser, fetchMyTrips]);
 
   const renderTripCard = ({ item }) => (
     <TripCard 

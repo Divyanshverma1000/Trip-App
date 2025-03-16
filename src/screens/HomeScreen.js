@@ -25,6 +25,7 @@ import { useNavigation } from "@react-navigation/native";
 
 const { width, height } = Dimensions.get("window");
 const BLOG_CARD_WIDTH = width * 0.85;
+const TRIP_CARD_WIDTH = (width - 40) / 2; // Dividing available width by 2 columns with padding
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -70,7 +71,7 @@ const HomeScreen = () => {
   }, []);
 
   const trendingBlogs = blogs
-    .filter((blog) => blog.ratings && blog.ratings.length > 0) // Only blogs with ratings
+    .filter((blog) => blog.ratings && blog.ratings.length > 0)
     .map((blog) => {
       const avgRating =
         blog.ratings.reduce((sum, rating) => sum + rating.value, 0) /
@@ -86,17 +87,31 @@ const HomeScreen = () => {
     setRefreshing(false);
   }, []);
 
+  const handleTripPress = (tripId) => {
+    console.log("Trip pressed with ID:", tripId);
+    navigation.navigate("TripDetails", { tripId });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor="#4CAF50" barStyle="light-content" />
 
       {/* Fixed Header Section */}
       <View style={styles.fixedHeader}>
-        <View style={styles.welcomeSection}>
-          <Text style={styles.welcomeText}>
-            Hello, {user?.name?.split(" ")[0] || "Traveler"}!
-          </Text>
-          <Text style={styles.subText}>Where to next?</Text>
+        <View style={styles.headerRow}>
+          <View style={styles.welcomeSection}>
+            <Text style={styles.welcomeText}>
+              Hello, {user?.name?.split(" ")[0] || "Traveler"}!
+            </Text>
+            <Text style={styles.subText}>Where to next?</Text>
+          </View>
+          
+          <TouchableOpacity 
+            style={styles.notificationButton}
+            onPress={() => navigation.navigate("Notification")}
+          >
+            <Feather name="bell" size={24} color="#333" />
+          </TouchableOpacity>
         </View>
 
         {/* Search Bar */}
@@ -164,17 +179,19 @@ const HomeScreen = () => {
             </TouchableOpacity>
           </View>
 
-          <View style={styles.tripsGrid}>
-            {openTrips.slice(0, 6).map((trip) => (
-              <TripCard
-                key={trip._id}
-                trip={trip}
-                style={styles.tripCard}
-                onPress={() =>
-                  navigation.navigate("TripDetailsScreen", { tripId: trip._id })
-                }
-              />
-            ))}
+          <View style={styles.tripsContainer}>
+            {loading ? (
+              <ActivityIndicator size="large" color="#4CAF50" style={styles.loader} />
+            ) : (
+              openTrips.slice(0, 6).map((trip) => (
+                <TripCard
+                  key={trip._id}
+                  trip={trip}
+                  style={styles.tripCard}
+                  onPress={() => navigation.navigate('TripDetailsScreen', { tripId: trip._id })}
+                />
+              ))
+            )}
           </View>
         </View>
       </ScrollView>
@@ -195,6 +212,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
   },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
   welcomeSection: {
     marginBottom: 16,
   },
@@ -207,6 +229,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#666",
     marginTop: 4,
+  },
+  notificationButton: {
+    padding: 8,
   },
   searchRow: {
     flexDirection: "row",
@@ -243,11 +268,24 @@ const styles = StyleSheet.create({
     width: BLOG_CARD_WIDTH,
     marginRight: 16,
   },
-  tripsGrid: {
+  tripsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    paddingHorizontal: 12,
-    gap: 12,
+    paddingHorizontal: 16,
+    justifyContent: "space-between",
+  },
+  tripCard: {
+    width: TRIP_CARD_WIDTH,
+    marginBottom: 16,
+    borderRadius: 12,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   lastSection: {
     paddingBottom: 24,

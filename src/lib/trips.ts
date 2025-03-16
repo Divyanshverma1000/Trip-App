@@ -113,14 +113,23 @@ export const getTrip = async (tripId: string): Promise<Trip> => {
 
 export const updateTrip = async (tripId: string, tripData: Partial<Trip>): Promise<Trip> => {
   try {
-    const response = await axios.put<Trip>(`/trips/update-trip`, tripData, {
-      params: { id: tripId },
+    console.log('Updating trip:', { tripId, tripData }); // Debug log
+    
+    // Send request to /api/trips/[TripID] instead of /trips/update-trip
+    const response = await axios.put<Trip>(`/trips/${tripId}`, tripData);
+    
+    Toast.show({
+      type: 'success',
+      text1: 'Trip updated successfully',
     });
+    
     return response.data;
   } catch (error: any) {
+    console.error('Update trip error:', error.response?.data || error);
     Toast.show({
       type: 'error',
       text1: 'Failed to update trip',
+      text2: error.response?.data?.message || error.message
     });
     throw error;
   }
@@ -192,7 +201,7 @@ export const respondToInvitation = async (tripId: string, action: 'accept' | 're
 
 export const leaveTrip = async (tripId: string): Promise<void> => {
   try {
-    await axios.post('/trips/leave-trip', { tripId });
+    await axios.post(`/trips/${tripId}/leave`);
     Toast.show({
       type: 'success',
       text1: 'Successfully left the trip',
@@ -200,7 +209,7 @@ export const leaveTrip = async (tripId: string): Promise<void> => {
   } catch (error: any) {
     Toast.show({
       type: 'error',
-      text1: 'Failed to leave trip',
+      text1: error.response?.data?.message || 'Failed to leave trip',
     });
     throw error;
   }

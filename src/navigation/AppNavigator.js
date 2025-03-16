@@ -23,7 +23,7 @@ import TripItineraryFormScreen from '../screens/TripItineraryScreen';
 import AllBlogsScreen from '../screens/AllBlogsScreen';
 import OpenTripsScreen from '../screens/OpenTripsScreen';
 import ChatRoomScreen from '../screens/ChatRoomScreen';
-
+import ItineraryPlanningScreen from '../screens/ItineraryPlanningScreen';
 export const navigationRef = createNavigationContainerRef();
 export const AuthContext = createContext({
   isAuthenticated: false,
@@ -139,6 +139,7 @@ const AppNavigator = () => {
                 <Stack.Screen name="InviteFriends" component={InviteFriendsScreen} />
                 <Stack.Screen name="AllBlogs" component={AllBlogsScreen} />
                 <Stack.Screen name="OpenTrips" component={OpenTripsScreen} />
+                <Stack.Screen name="ItineraryPlanning" component={ItineraryPlanningScreen} />
                 <Stack.Screen 
                   name="ChatRoom" 
                   component={ChatRoomScreen}

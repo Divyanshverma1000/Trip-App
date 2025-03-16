@@ -146,7 +146,7 @@ const InviteFriendsScreen = ({ navigation, route }) => {
           style={styles.nextButton}
           onPress={handleNext}
         >
-          <Text style={styles.nextButtonText}>Next: Plan Itinerary</Text>
+          <Text style={styles.nextButtonText}>Invite Selected Friends</Text>
           <Feather name="arrow-right" size={20} color="#FFF" />
         </TouchableOpacity>
       </View>

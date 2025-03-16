@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import Animated, { useSharedValue, FadeInUp } from 'react-native-reanimated';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { getTrip, joinTrip as joinTripApi, deleteTrip } from '../lib/trips';
+import { getTrip, joinTrip as joinTripApi, deleteTrip, leaveTrip } from '../lib/trips';
 import { TripHeader } from '../components/TripHeader';
 import { TripTag } from '../components/TripTag';
 import { MaterialIcons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
@@ -34,6 +34,22 @@ const TripDetailsScreen = () => {
   const { user } = useContext(AuthContext);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Check if current user is host or has editor role
+  const hasEditAccess = React.useMemo(() => {
+    if (!trip || !user) return false;
+
+    // Check if user is host
+    if (trip.host._id === user.id) return true;
+
+    // Check if user is a member with editor role
+    const userMember = trip.members.find(member => 
+      member.user._id === user.id && 
+      member.status === 'accepted'
+    );
+    
+    return userMember?.role === 'editor';
+  }, [trip, user]);
 
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -101,6 +117,38 @@ const TripDetailsScreen = () => {
     }
   };
 
+  const handleLeaveTrip = async () => {
+    Alert.alert(
+      'Leave Trip',
+      'Are you sure you want to leave this trip?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Leave',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await leaveTrip(trip._id);
+              navigation.navigate('Home');
+            } catch (error) {
+              console.error('Failed to leave trip:', error);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const isAcceptedMember = trip?.members?.some(
+    member => member.user._id === user?.id && 
+    member.status === 'accepted' && 
+    member.role !== 'host'
+  );
+
   const renderHeaderRight = () => {
     if (!isHost) return null;
 
@@ -142,6 +190,44 @@ const TripDetailsScreen = () => {
         <View style={styles.contentPadding} />
         <View style={styles.content}>
           <Text style={styles.description}>{trip.description}</Text>
+
+          {/* Add Edit Itinerary Button only for users with access */}
+          {hasEditAccess && (
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => navigation.navigate('ItineraryPlanning', { tripId: trip._id })}
+            >
+              <View style={styles.editButtonContent}>
+                <Feather 
+                  name={trip.itinerary?.length > 0 ? "edit-2" : "plus"} 
+                  size={20} 
+                  color="#FFF" 
+                />
+                <Text style={styles.editButtonText}>
+                  {trip.itinerary?.length > 0 ? 'Edit Itinerary' : 'Add Itinerary'}
+                </Text>
+              </View>
+              <View style={styles.editButtonStatus}>
+                <Text style={styles.statusText}>
+                  {trip.status.charAt(0).toUpperCase() + trip.status.slice(1)}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
+
+          {/* Show a message for viewers */}
+          {trip.members.some(member => 
+            member.user._id === user?.id && 
+            member.status === 'accepted' && 
+            member.role === 'viewer'
+          ) && (
+            <View style={styles.viewerMessage}>
+              <Feather name="info" size={16} color="#666" />
+              <Text style={styles.viewerMessageText}>
+                You have viewer access to this trip
+              </Text>
+            </View>
+          )}
 
           {/* Invite Friends Button for Host */}
           {isHost && (
@@ -407,6 +493,17 @@ const TripDetailsScreen = () => {
                 ))}
               </View>
             </View>
+          )}
+          {isAcceptedMember && (
+            <TouchableOpacity
+              style={styles.leaveButton}
+              onPress={handleLeaveTrip}
+            >
+              <View style={styles.leaveButtonContent}>
+                <Feather name="log-out" size={20} color="#FF5252" />
+                <Text style={styles.leaveButtonText}>Leave Trip</Text>
+              </View>
+            </TouchableOpacity>
           )}
         </View>
       </Animated.ScrollView>
@@ -829,7 +926,68 @@ const styles = StyleSheet.create({
   },
   pendingStatus: {
     color: '#D97706'
-  }
+  },
+  editButton: {
+    backgroundColor: '#4CAF50',
+    borderRadius: 12,
+    marginBottom: 16,
+    overflow: 'hidden',
+  },
+  editButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+  },
+  editButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  editButtonStatus: {
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    padding: 4,
+    alignItems: 'center',
+  },
+  statusText: {
+    color: '#FFF',
+    fontSize: 12,
+    textTransform: 'capitalize',
+  },
+  viewerMessage: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  viewerMessageText: {
+    marginLeft: 8,
+    color: '#666',
+    fontSize: 14,
+  },
+  leaveButton: {
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#FF5252',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  leaveButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    backgroundColor: '#FFF',
+  },
+  leaveButtonText: {
+    marginLeft: 8,
+    color: '#FF5252',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
 
 export default TripDetailsScreen;
