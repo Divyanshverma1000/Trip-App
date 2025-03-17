@@ -1,5 +1,5 @@
-import axios from './axios';
-import Toast from 'react-native-toast-message';
+import axios from "./axios";
+import Toast from "react-native-toast-message";
 
 export interface User {
   _id: string;
@@ -32,12 +32,12 @@ export interface Post {
 }
 
 export const getProfile = async (): Promise<User> => {
-  const response = await axios.get<User>('/users/profile');
+  const response = await axios.get<User>("/users/profile");
   return response.data;
 };
 
 export const addFriend = async (friendId: string): Promise<any> => {
-  const response = await axios.post('/users/add-friend', { friendId });
+  const response = await axios.post("/users/add-friend", { friendId });
   return response.data;
 };
 
@@ -47,15 +47,15 @@ export const updateProfilePhoto = async (photo: {
   type?: string;
 }): Promise<any> => {
   const formData = new FormData();
-  formData.append('photo', {
+  formData.append("photo", {
     uri: photo.uri,
-    name: photo.fileName || 'profile.jpg',
-    type: photo.type || 'image/jpeg',
+    name: photo.fileName || "profile.jpg",
+    type: photo.type || "image/jpeg",
   } as any); // casting as any for React Native FormData
 
-  const response = await axios.put('/users/profile-photo', formData, {
+  const response = await axios.put("/users/profile-photo", formData, {
     headers: {
-      'Content-Type': 'multipart/form-data',
+      "Content-Type": "multipart/form-data",
     },
   });
   return response.data;
@@ -63,16 +63,101 @@ export const updateProfilePhoto = async (photo: {
 
 export const searchUsers = async (query: string): Promise<User[]> => {
   try {
-    const response = await axios.get<User[]>('/users/search', {
-      params: { query }
+    const response = await axios.get<User[]>("/users/search", {
+      params: { query },
     });
     return response.data;
   } catch (error: any) {
-    const errorMessage = error.response?.data?.message || 'Failed to search users';
+    const errorMessage =
+      error.response?.data?.message || "Failed to search users";
+    Toast.show({
+      type: "error",
+      text1: "Search failed",
+      text2: errorMessage,
+    });
+    throw error;
+  }
+};
+
+export const getUnrespondedInvites = async (): Promise<any[]> => {
+  try {
+    const response = await axios.get<any[]>('/notifications/unresponded');
+    const data = response.data;
+
+    const notifications = data.map((n) => ({
+      _id: n._id,
+      text: n.message,
+      timestamp: new Date(n.createdAt).toLocaleString(),
+      tripId: n.tripId,
+      tripName: `Trip (${n.tripId})`,
+      date: new Date(n.createdAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+    }));
+
+    if (notifications.length === 0) {
+      Toast.show({
+        type: 'info',
+        text1: 'No notifications',
+        text2: 'You have no pending trip invitations',
+      });
+    }
+    return notifications;
+  } catch (error: any) {
     Toast.show({
       type: 'error',
-      text1: 'Search failed',
-      text2: errorMessage
+      text1: 'Failed to fetch notifications',
+      text2: error.response?.data?.message || error.message,
+    });
+    throw error;
+  }
+};
+
+export const acceptTripInvitation = async (
+  notificationId: string
+): Promise<any> => {
+  try {
+    const response = await axios.post("/notifications/respond-to-invitation", {
+      notificationId,
+      response: "accept",
+    });
+    Toast.show({
+      type: "success",
+      text1: "Invitation accepted",
+      text2: response.data.message,
+    });
+    return response.data;
+  } catch (error: any) {
+    Toast.show({
+      type: "error",
+      text1: "Failed to accept invitation",
+      text2: error.response?.data?.message || error.message,
+    });
+    throw error;
+  }
+};
+
+export const declineTripInvitation = async (
+  notificationId: string
+): Promise<any> => {
+  try {
+    const response = await axios.post("/notifications/respond-to-invitation", {
+      notificationId,
+      response: "reject",
+    });
+    Toast.show({
+      type: "success",
+      text1: "Invitation declined",
+      text2: response.data.message,
+    });
+    return response.data;
+  } catch (error: any) {
+    Toast.show({
+      type: "error",
+      text1: "Failed to decline invitation",
+      text2: error.response?.data?.message || error.message,
     });
     throw error;
   }
