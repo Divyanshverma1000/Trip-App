@@ -93,7 +93,6 @@ const BlogDetailsScreen = () => {
     );
   }
 
-  // Calculate average rating
   const calculateAverageRating = () => {
     if (!blog.ratings || blog.ratings.length === 0) return 0;
     const sum = blog.ratings.reduce((acc, rating) => acc + rating.value, 0);
@@ -137,7 +136,6 @@ const BlogDetailsScreen = () => {
 
   const canRate = blog.host._id !== user.id;
 
-  // Q&A Handlers
   const handleAskQuestion = async () => {
     if (!newQuestionText.trim()) return;
     try {
@@ -211,6 +209,21 @@ const BlogDetailsScreen = () => {
     ? questions
     : questions.slice(0, 3);
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+    if (diffDays < 7) {
+      if (diffDays <= 0) return "Today";
+      return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+    }
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
   return (
     <View style={styles.container}>
       {/* Header with Back Button */}
@@ -234,20 +247,35 @@ const BlogDetailsScreen = () => {
         scrollEventThrottle={16}
       >
         <View style={styles.content}>
-          {/* Title */}
-          <Text style={styles.title}>{blog.title}</Text>
+          {/* Title Section */}
+          <View style={styles.sectionBox}>
+            <Text style={styles.title}>{blog.title}</Text>
+            <Text style={styles.postDetails}>
+              Posted by {blog.host.name} on {formatDate(blog.createdAt)}
+            </Text>
+          </View>
 
           {/* Summary Section */}
           {blog.summary && (
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionHeader}>Summary</Text>
+            <View style={styles.sectionBox}>
+              <View style={styles.sectionHeaderContainer}>
+                <MaterialCommunityIcons
+                  name="file-document-outline"
+                  size={20}
+                  color="#4CAF50"
+                />
+                <Text style={styles.sectionHeader}>Summary</Text>
+              </View>
               <Text style={styles.sectionText}>{blog.summary}</Text>
             </View>
           )}
 
-          {/* Ratings */}
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionHeader}>Ratings</Text>
+          {/* Ratings Section */}
+          <View style={styles.sectionBox}>
+            <View style={styles.sectionHeaderContainer}>
+              <MaterialIcons name="star" size={20} color="#FFD700" />
+              <Text style={styles.sectionHeader}>Ratings</Text>
+            </View>
             <View style={styles.ratingDisplay}>
               <Text style={styles.averageRatingText}>
                 Average Rating: {calculateAverageRating()}{" "}
@@ -301,33 +329,61 @@ const BlogDetailsScreen = () => {
 
           {/* Description Section */}
           {blog.description && (
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionHeader}>Description</Text>
+            <View style={styles.sectionBox}>
+              <View style={styles.sectionHeaderContainer}>
+                <MaterialCommunityIcons
+                  name="text-box-outline"
+                  size={20}
+                  color="#4CAF50"
+                />
+                <Text style={styles.sectionHeader}>Description</Text>
+              </View>
               <Text style={styles.sectionText}>{blog.description}</Text>
             </View>
           )}
 
           {/* Recommendations & Advisory */}
           {(blog.recommendations || blog.advisory) && (
-            <View style={styles.sectionContainer}>
+            <View style={styles.sectionBox}>
               {blog.recommendations && (
-                <>
+                <View style={styles.sectionHeaderContainer}>
+                  <MaterialCommunityIcons
+                    name="thumb-up-outline"
+                    size={20}
+                    color="#4CAF50"
+                  />
                   <Text style={styles.sectionHeader}>Recommendations</Text>
-                  <Text style={styles.sectionText}>{blog.recommendations}</Text>
-                </>
+                </View>
+              )}
+              {blog.recommendations && (
+                <Text style={styles.sectionText}>{blog.recommendations}</Text>
               )}
               {blog.advisory && (
-                <>
+                <View style={styles.sectionHeaderContainer}>
+                  <MaterialCommunityIcons
+                    name="alert-circle-outline"
+                    size={20}
+                    color="#4CAF50"
+                  />
                   <Text style={styles.sectionHeader}>Advisory</Text>
-                  <Text style={styles.sectionText}>{blog.advisory}</Text>
-                </>
+                </View>
+              )}
+              {blog.advisory && (
+                <Text style={styles.sectionText}>{blog.advisory}</Text>
               )}
             </View>
           )}
 
           {/* Photo Gallery */}
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionHeader}>Photos</Text>
+          <View style={styles.sectionBox}>
+            <View style={styles.sectionHeaderContainer}>
+              <MaterialCommunityIcons
+                name="image-multiple-outline"
+                size={20}
+                color="#4CAF50"
+              />
+              <Text style={styles.sectionHeader}>Photos</Text>
+            </View>
             {blog.photos && blog.photos.length > 0 ? (
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 {blog.photos.map((photo, index) => (
@@ -349,8 +405,11 @@ const BlogDetailsScreen = () => {
 
           {/* Contact Info */}
           {blog.contactInfo && blog.contactInfo.length > 0 && (
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionHeader}>Contact Information</Text>
+            <View style={styles.sectionBox}>
+              <View style={styles.sectionHeaderContainer}>
+                <MaterialIcons name="contact-phone" size={20} color="#4CAF50" />
+                <Text style={styles.sectionHeader}>Contact Information</Text>
+              </View>
               {blog.contactInfo.map((contact, idx) => (
                 <View key={idx} style={styles.contactItem}>
                   <Text style={styles.contactLabel}>{contact.label}</Text>
@@ -371,22 +430,36 @@ const BlogDetailsScreen = () => {
 
           {/* Tags & Budget */}
           {(blog.tags && blog.tags.length > 0) || blog.budget ? (
-            <View style={styles.sectionContainer}>
+            <View style={styles.sectionBox}>
               {blog.tags && blog.tags.length > 0 && (
-                <>
+                <View style={styles.sectionHeaderContainer}>
+                  <MaterialCommunityIcons
+                    name="tag-outline"
+                    size={20}
+                    color="#4CAF50"
+                  />
                   <Text style={styles.sectionHeader}>Tags</Text>
-                  <View style={styles.tagsContainer}>
-                    {blog.tags.map((tag, index) => (
-                      <View key={index} style={styles.tag}>
-                        <Text style={styles.tagText}>{tag}</Text>
-                      </View>
-                    ))}
-                  </View>
-                </>
+                </View>
+              )}
+              {blog.tags && blog.tags.length > 0 && (
+                <View style={styles.tagsContainer}>
+                  {blog.tags.map((tag, index) => (
+                    <View key={index} style={styles.tag}>
+                      <Text style={styles.tagText}>{tag}</Text>
+                    </View>
+                  ))}
+                </View>
               )}
               {blog.budget && (
                 <>
-                  <Text style={styles.sectionHeader}>Budget</Text>
+                  <View style={styles.sectionHeaderContainer}>
+                    <MaterialIcons
+                      name="attach-money"
+                      size={20}
+                      color="#4CAF50"
+                    />
+                    <Text style={styles.sectionHeader}>Budget</Text>
+                  </View>
                   <Text style={styles.sectionText}>${blog.budget}</Text>
                 </>
               )}
@@ -395,8 +468,15 @@ const BlogDetailsScreen = () => {
 
           {/* Concerns */}
           {blog.concerns && (
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionHeader}>Concerns</Text>
+            <View style={styles.sectionBox}>
+              <View style={styles.sectionHeaderContainer}>
+                <MaterialCommunityIcons
+                  name="alert-outline"
+                  size={20}
+                  color="#4CAF50"
+                />
+                <Text style={styles.sectionHeader}>Concerns</Text>
+              </View>
               <View style={styles.concernsContainer}>
                 {blog.concerns.womenSafety && (
                   <View style={styles.concernItem}>
@@ -416,9 +496,7 @@ const BlogDetailsScreen = () => {
                 )}
                 {blog.concerns.culturalExperience && (
                   <View style={styles.concernItem}>
-                    <Text style={styles.concernLabel}>
-                      Cultural Experience:
-                    </Text>
+                    <Text style={styles.concernLabel}>Cultural:</Text>
                     <Text style={styles.concernValue}>
                       {blog.concerns.culturalExperience}/5
                     </Text>
@@ -438,8 +516,11 @@ const BlogDetailsScreen = () => {
 
           {/* Trip Details & Itinerary */}
           {blog.trip && (
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionHeader}>Trip Details</Text>
+            <View style={styles.sectionBox}>
+              <View style={styles.sectionHeaderContainer}>
+                <MaterialIcons name="flight" size={20} color="#4CAF50" />
+                <Text style={styles.sectionHeader}>Trip Details</Text>
+              </View>
               <View style={styles.metadata}>
                 <View style={styles.metadataItem}>
                   <MaterialIcons name="location-on" size={24} color="#6366F1" />
@@ -460,7 +541,14 @@ const BlogDetailsScreen = () => {
               </View>
               {blog.trip.itinerary && blog.trip.itinerary.length > 0 && (
                 <View style={styles.itinerary}>
-                  <Text style={styles.sectionHeader}>Itinerary</Text>
+                  <View style={styles.sectionHeaderContainer}>
+                    <MaterialCommunityIcons
+                      name="calendar-text-outline"
+                      size={20}
+                      color="#4CAF50"
+                    />
+                    <Text style={styles.sectionHeader}>Itinerary</Text>
+                  </View>
                   {blog.trip.itinerary.map((day, index) => (
                     <TouchableOpacity
                       key={day._id}
@@ -716,17 +804,43 @@ const styles = StyleSheet.create({
   coverImage: { width: "100%", height: 300 },
   scrollView: { marginTop: 0 },
   content: { padding: 16 },
-  title: { fontSize: 26, fontWeight: "bold", marginBottom: 16, color: "#333" },
-  sectionContainer: { marginBottom: 24 },
+  sectionBox: {
+    backgroundColor: "#f9f9f9",
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 24,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  sectionHeaderContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
   sectionHeader: {
     fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 8,
     color: "#4CAF50",
+    marginLeft: 6,
+  },
+  sectionBox: {
+    marginBottom: 24,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  postDetails: {
+    fontSize: 14,
+    color: "#757575",
+    marginTop: 4,
   },
   sectionText: { fontSize: 16, color: "#555", lineHeight: 24 },
-  summary: { fontSize: 16, marginBottom: 16, color: "#444" },
-  author: { fontSize: 16, color: "#666", marginBottom: 16 },
+  title: { fontSize: 26, fontWeight: "bold", marginBottom: 16, color: "#333" },
   ratingDisplay: {
     flexDirection: "row",
     alignItems: "center",
@@ -738,7 +852,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     padding: 12,
     backgroundColor: "#f0f0f0",
-    borderRadius: 8,
+    borderRadius: 12,
   },
   ratingSubmissionText: { fontSize: 16, marginBottom: 8 },
   starSubmissionContainer: { flexDirection: "row" },
@@ -787,44 +901,38 @@ const styles = StyleSheet.create({
   detailText: { fontSize: 14, color: "#666", marginBottom: 4 },
   detailMeta: { fontSize: 13, color: "#888", marginTop: 2 },
   ratingContainer: { flexDirection: "row", alignItems: "center", marginTop: 4 },
-  placeItem: {
-    marginBottom: 12,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+  photoContainer: { marginRight: 12 },
+  photo: { width: 150, height: 150, borderRadius: 8 },
+  photoCaption: { fontSize: 12, color: "#555", marginTop: 4 },
+  noPhotos: { justifyContent: "center", alignItems: "center", height: 150 },
+  noPhotosText: { color: "#ccc", marginTop: 8 },
+  contactItem: { marginBottom: 12 },
+  contactLabel: { fontSize: 16, fontWeight: "600", color: "#333" },
+  contactText: { fontSize: 14, color: "#555" },
+  tagsContainer: { flexDirection: "row", flexWrap: "wrap", marginBottom: 12 },
+  tag: {
+    backgroundColor: "#eee",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 20,
+    marginRight: 8,
+    marginBottom: 8,
   },
-  placeName: {
-    fontSize: 15,
+  tagText: { fontSize: 14, color: "#4CAF50" },
+  concernsContainer: { flexDirection: "row", flexWrap: "wrap" },
+  concernItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 16,
+    marginBottom: 8,
+  },
+  concernLabel: {
+    fontSize: 14,
     fontWeight: "600",
-    color: "#6366F1",
-    marginBottom: 4,
+    color: "#333",
+    marginRight: 4,
   },
-  restaurantItem: {
-    marginBottom: 12,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  restaurantName: { fontSize: 15, fontWeight: "600", color: "#6366F1" },
-  mealType: {
-    fontSize: 13,
-    color: "#888",
-    fontStyle: "italic",
-    marginBottom: 4,
-  },
-  activityItem: {
-    marginBottom: 12,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  activityName: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#6366F1",
-    marginBottom: 4,
-  },
-  errorText: { fontSize: 16, color: "red" },
+  concernValue: { fontSize: 14, color: "#555" },
   qaSection: {
     marginTop: 32,
     borderTopWidth: 1,
@@ -930,38 +1038,6 @@ const styles = StyleSheet.create({
   },
   modalButton: { padding: 8 },
   modalButtonText: { fontSize: 16, color: "#4CAF50", fontWeight: "600" },
-  photoContainer: { marginRight: 12 },
-  photo: { width: 150, height: 150, borderRadius: 8 },
-  photoCaption: { fontSize: 12, color: "#555", marginTop: 4 },
-  noPhotos: { justifyContent: "center", alignItems: "center", height: 150 },
-  noPhotosText: { color: "#ccc", marginTop: 8 },
-  contactItem: { marginBottom: 12 },
-  contactLabel: { fontSize: 16, fontWeight: "600", color: "#333" },
-  contactText: { fontSize: 14, color: "#555" },
-  tagsContainer: { flexDirection: "row", flexWrap: "wrap" },
-  tag: {
-    backgroundColor: "#eee",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 20,
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  tagText: { fontSize: 14, color: "#4CAF50" },
-  concernsContainer: { flexDirection: "row", flexWrap: "wrap" },
-  concernItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginRight: 16,
-    marginBottom: 8,
-  },
-  concernLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
-    marginRight: 4,
-  },
-  concernValue: { fontSize: 14, color: "#555" },
 });
 
 export default BlogDetailsScreen;
