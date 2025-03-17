@@ -11,13 +11,14 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { getUserTrips } from '../../lib/trips';
 import { createBlogPost } from '../../lib/blogs';
-
+import { AuthContext } from '../../navigation/AppNavigator';
+import { getMyTrips } from '../../lib/trips';
+import { useContext } from 'react';
 const CreateBlogTripScreen = ({ route }) => {
   const { blogData } = route.params;
   const navigation = useNavigation();
-  
+  const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [userTrips, setUserTrips] = useState([]);
   const [selectedOption, setSelectedOption] = useState(null); // 'no-trip', 'existing-trip', 'new-trip'
@@ -29,7 +30,7 @@ const CreateBlogTripScreen = ({ route }) => {
 
   const fetchUserTrips = async () => {
     try {
-      const trips = await getUserTrips();
+      const trips = await getMyTrips(user.id); 
       setUserTrips(trips);
     } catch (error) {
       console.error('Error fetching trips:', error);
@@ -39,9 +40,10 @@ const CreateBlogTripScreen = ({ route }) => {
   const handleCreateBlog = async () => {
     setLoading(true);
     try {
+      console.log("ths selected trip._id",selectedTripId);
       const blogPostData = {
         ...blogData,
-        trip: selectedTripId, // Will be null if no trip is selected
+        tripId: selectedTripId, // Will be null if no trip is selected
       };
 
       const response = await createBlogPost(blogPostData);

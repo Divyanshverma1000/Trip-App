@@ -135,16 +135,21 @@ const CreateTripScreen = ({ navigation }) => {
       type: photoType
     });
 
+
     additionalPhotos.forEach((photo, index) => {
       const fileName = photo.uri.split('/').pop();
       const fileType = 'image/' + (fileName.split('.').pop() || 'jpeg');
-      formData.append(`tripPhotos`, {
+      
+      formData.append("tripPhotos", {
         uri: photo.uri,
         name: fileName,
         type: fileType
       });
-      // formData.append(`photosCaptions`, photo.caption || '');
+    
+      // Append captions using array notation
+      formData.append(`photosCaptions[${index}]`, photo.caption || '');
     });
+    
 
     try {
       setLoading(true);
