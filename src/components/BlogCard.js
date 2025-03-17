@@ -4,41 +4,63 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 const BlogCard = ({ blog, style, onPress }) => {
-  // Use first photo as cover photo if available, otherwise use placeholder
+  // Use coverPhoto if available, otherwise use first photo or placeholder
   const coverPhotoUrl = 
-    blog.photos && blog.photos.length > 0 
+    blog.coverPhoto || (blog.photos && blog.photos.length > 0 
       ? blog.photos[0].url 
-      : 'https://via.placeholder.com/200x120';
+      : 'https://via.placeholder.com/200x120');
+
+  // Calculate average rating
+  const avgRating = blog.ratings.length > 0 
+    ? blog.ratings.reduce((acc, curr) => acc + curr.value, 0) / blog.ratings.length
+    : 0;
 
   return (
     <TouchableOpacity onPress={onPress} style={[styles.card, style]}>
       <Image source={{ uri: coverPhotoUrl }} style={styles.image} />
       <View style={styles.content}>
-        <View style={styles.authorRow}>
-          <Image 
-            source={{ uri: blog.host.photo || 'https://via.placeholder.com/40' }} 
-            style={styles.authorImage} 
-          />
-          <Text style={styles.authorName}>{blog.host.name}</Text>
-        </View>
-        <Text style={styles.caption} numberOfLines={2}>
-          {blog.caption}
+        <Text style={styles.title} numberOfLines={2}>
+          {blog.title}
         </Text>
-        <View style={styles.footer}>
-          <View style={styles.statsContainer}>
-            <View style={styles.stat}>
-              <Feather name="heart" size={14} color="#666" />
-              <Text style={styles.statText}>{blog.ratings?.length || 0}</Text>
-            </View>
-            <View style={styles.stat}>
-              <Feather name="message-circle" size={14} color="#666" />
-              <Text style={styles.statText}>{blog.comments?.length || 0}</Text>
-            </View>
-          </View>
-          <Text style={styles.timeText}>
-            {new Date(blog.createdAt).toLocaleDateString()}
+        
+        {blog.summary && (
+          <Text style={styles.summary} numberOfLines={2}>
+            {blog.summary}
           </Text>
+        )}
+
+        <View style={styles.metaInfo}>
+          <View style={styles.hostInfo}>
+            <Image 
+              source={{ uri: blog.host.photo || 'https://via.placeholder.com/40x40' }}
+              style={styles.hostPhoto}
+            />
+            <Text style={styles.hostName}>By {blog.host.name}</Text>
+          </View>
+
+          <View style={styles.stats}>
+            <View style={styles.stat}>
+              <Feather name="star" size={14} color="#FFD700" />
+              <Text style={styles.statText}>{avgRating.toFixed(1)}</Text>
+            </View>
+            {blog.budget && (
+              <View style={styles.stat}>
+                <Feather name="dollar-sign" size={14} color="#4CAF50" />
+                <Text style={styles.statText}>{blog.budget}</Text>
+              </View>
+            )}
+          </View>
         </View>
+
+        {blog.tags && blog.tags.length > 0 && (
+          <View style={styles.tagsContainer}>
+            {blog.tags.slice(0, 3).map((tag, index) => (
+              <View key={index} style={styles.tag}>
+                <Text style={styles.tagText}>#{tag}</Text>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -54,63 +76,78 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    marginBottom: 16,
   },
   image: {
     width: '100%',
-    height: 180,
+    height: 200,
     resizeMode: 'cover',
   },
   content: {
-    padding: 12,
+    padding: 16,
   },
-  authorRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
     marginBottom: 8,
   },
-  authorImage: {
+  summary: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 12,
+  },
+  metaInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  hostInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  hostPhoto: {
     width: 24,
     height: 24,
     borderRadius: 12,
     marginRight: 8,
   },
-  authorName: {
+  hostName: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
+    color: '#666',
   },
-  caption: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  statsContainer: {
+  stats: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   stat: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 16,
+    marginLeft: 16,
   },
   statText: {
     marginLeft: 4,
-    fontSize: 12,
+    fontSize: 14,
     color: '#666',
   },
-  timeText: {
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 8,
+  },
+  tag: {
+    backgroundColor: '#f0f0f0',
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  tagText: {
     fontSize: 12,
     color: '#666',
   },
 });
 
 export default BlogCard;
-
-
