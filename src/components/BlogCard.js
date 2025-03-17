@@ -6,7 +6,7 @@ import { Feather } from '@expo/vector-icons';
 const BlogCard = ({ blog, style, onPress }) => {
   // Use coverPhoto if available, otherwise use first photo or placeholder
   const coverPhotoUrl = 
-    blog.coverPhoto || (blog.photos && blog.photos.length > 0 
+    blog.blogCoverPhoto || (blog.photos && blog.photos.length > 0 
       ? blog.photos[0].url 
       : 'https://via.placeholder.com/200x120');
 
@@ -14,6 +14,10 @@ const BlogCard = ({ blog, style, onPress }) => {
   const avgRating = blog.ratings.length > 0 
     ? blog.ratings.reduce((acc, curr) => acc + curr.value, 0) / blog.ratings.length
     : 0;
+
+    console.log('Blog Host:', blog.host);
+    console.log('Blog Host Photo:', blog.host?.photo);
+
 
   return (
     <TouchableOpacity onPress={onPress} style={[styles.card, style]}>
@@ -31,10 +35,12 @@ const BlogCard = ({ blog, style, onPress }) => {
 
         <View style={styles.metaInfo}>
           <View style={styles.hostInfo}>
-            <Image 
-              source={{ uri: blog.host.photo || 'https://via.placeholder.com/40x40' }}
-              style={styles.hostPhoto}
-            />
+            
+          <Image 
+            source={{ uri: blog.host?.photo || 'https://avatar.iran.liara.run/public/boy?username=Ash' }}
+            style={styles.hostPhoto}
+          />
+
             <Text style={styles.hostName}>By {blog.host.name}</Text>
           </View>
 
