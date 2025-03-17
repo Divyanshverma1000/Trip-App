@@ -5,6 +5,7 @@ import CreateBlogContentScreen from '../screens/CreateBlog/CreateBlogContentScre
 import CreateBlogTagsScreen from '../screens/CreateBlog/CreateBlogTagsScreen';
 import CreateBlogTripScreen from '../screens/CreateBlog/CreateBlogTripScreen';
 import CreateTripScreen from '../screens/CreateTripScreen'; // Your existing trip creation screen
+import CreateBlogPhotosScreen from '../screens/CreateBlog/CreateBlogPhotosScreen';
 
 const Stack = createStackNavigator();
 
@@ -12,25 +13,42 @@ const CreateBlogNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: false,
-        cardStyle: { backgroundColor: '#fff' },
+        headerStyle: {
+          backgroundColor: '#4CAF50',
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontWeight: '600',
+        },
       }}
     >
-      <Stack.Screen 
-        name="CreateBlogContent" 
+      <Stack.Screen
+        name="CreateBlogContent"
         component={CreateBlogContentScreen}
+        options={{
+          headerTitle: 'Create New Blog',
+        }}
       />
-      <Stack.Screen 
-        name="CreateBlogTags" 
+      <Stack.Screen
+        name="CreateBlogTags"
         component={CreateBlogTagsScreen}
+        options={{
+          headerTitle: 'Add Tags',
+        }}
       />
-      <Stack.Screen 
-        name="CreateBlogTrip" 
+      <Stack.Screen
+        name="CreateBlogPhotos"
+        component={CreateBlogPhotosScreen}
+        options={{
+          headerTitle: 'Add Photos',
+        }}
+      />
+      <Stack.Screen
+        name="CreateBlogTrip"
         component={CreateBlogTripScreen}
-      />
-      <Stack.Screen 
-        name="CreateTrip" 
-        component={CreateTripScreen}
+        options={{
+          headerTitle: 'Trip Details',
+        }}
       />
     </Stack.Navigator>
   );

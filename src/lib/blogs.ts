@@ -78,30 +78,40 @@ export interface Question {
 }
 
 export interface CreateBlogPostData {
-  tripId?: string;
   title: string;
   summary?: string;
   description?: string;
   recommendations?: string;
   advisory?: string;
-  coverPhoto?: string;
-  photos?: Photo[];
-  contactInfo?: ContactInfo[];
+  blogCoverPhoto?: File | Blob;
+  blogPhotos?: Array<{
+    file: File | Blob;
+    caption?: string;
+  }>;
   tags?: string[];
   budget?: number;
+  tripId?: string;
   concerns?: Concerns;
 }
 
-export const createBlogPost = async (blogData: CreateBlogPostData): Promise<BlogPost> => {
+export const createBlogPost = async (formData: FormData): Promise<BlogPost> => {
   try {
-    const response = await axios.post<BlogPost>('/blogs', blogData);
+    console.log('Creating blog post with FormData');
+    
+    const response = await axios.post<BlogPost>('/blogs', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
     Toast.show({
       type: 'success',
       text1: 'Blog post created successfully'
     });
+    
     return response.data;
   } catch (error: any) {
-    console.error('Blog creation error:', error);
+    console.error('Blog creation error:', error.response?.data || error);
     Toast.show({
       type: 'error',
       text1: 'Failed to create blog post',

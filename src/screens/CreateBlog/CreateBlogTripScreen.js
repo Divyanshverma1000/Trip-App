@@ -15,9 +15,8 @@ import { createBlogPost } from '../../lib/blogs';
 import { AuthContext } from '../../navigation/AppNavigator';
 import { getMyTrips } from '../../lib/trips';
 import { useContext } from 'react';
-const CreateBlogTripScreen = ({ route }) => {
+const CreateBlogTripScreen = ({ route, navigation }) => {
   const { blogData } = route.params;
-  const navigation = useNavigation();
   const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [userTrips, setUserTrips] = useState([]);
@@ -40,13 +39,12 @@ const CreateBlogTripScreen = ({ route }) => {
   const handleCreateBlog = async () => {
     setLoading(true);
     try {
-      console.log("ths selected trip._id",selectedTripId);
-      const blogPostData = {
-        ...blogData,
-        tripId: selectedTripId, // Will be null if no trip is selected
-      };
+      // If a trip is selected, append it to the FormData
+      if (selectedTripId) {
+        blogData.append('tripId', selectedTripId);
+      }
 
-      const response = await createBlogPost(blogPostData);
+      const response = await createBlogPost(blogData);
       
       Alert.alert(
         'Success',
@@ -54,7 +52,7 @@ const CreateBlogTripScreen = ({ route }) => {
         [
           {
             text: 'OK',
-            onPress: () => navigation.navigate('Feed') // Or wherever you want to navigate after success
+            onPress: () => navigation.navigate('Feed')
           }
         ]
       );

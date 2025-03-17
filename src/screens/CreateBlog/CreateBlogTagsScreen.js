@@ -18,13 +18,13 @@ const TAGS = [
   { id: '6', name: 'FamilyFriendly', icon: 'users' },
   { id: '7', name: 'SoloTravel', icon: 'user' },
   { id: '8', name: 'CityBreak', icon: 'home' },
-  { id: '9', name: 'NatureEscape', icon: 'tree' },
+  { id: '9', name: 'NatureEscape', icon: 'map-pin' },
   { id: '10', name: 'BeachVacation', icon: 'umbrella' },
-  { id: '11', name: 'HistoricalSites', icon: 'landmark' },
+  { id: '11', name: 'HistoricalSites', icon: 'book' },
   { id: '12', name: 'FoodieJourney', icon: 'coffee' },
   { id: '13', name: 'LuxuryTravel', icon: 'star' },
   { id: '14', name: 'RoadTrip', icon: 'map' },
-  { id: '15', name: 'EcoTourism', icon: 'leaf' },
+  { id: '15', name: 'EcoTourism', icon: 'droplet' },
   { id: '16', name: 'Nightlife', icon: 'moon' },
   { id: '17', name: 'OffTheBeatenPath', icon: 'compass' },
   { id: '18', name: 'WinterGetaway', icon: 'cloud-snow' },
@@ -47,7 +47,7 @@ const CreateBlogTagsScreen = ({ route, navigation }) => {
 
   const handleNext = () => {
     if (selectedTags.length > 0) {
-      navigation.navigate('CreateBlogTrip', {
+      navigation.navigate('CreateBlogPhotos', {
         blogData: { ...blogData, tags: selectedTags }
       });
     }
