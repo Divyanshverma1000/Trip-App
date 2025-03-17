@@ -9,7 +9,8 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  FlatList
+  FlatList,
+  Dimensions
 } from 'react-native';
 import Animated, { useSharedValue, FadeInUp } from 'react-native-reanimated';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -21,6 +22,8 @@ import { getStorageItem } from '../lib/storage';
 import { AuthContext } from '../navigation/AppNavigator';
 import DeleteTripModal from '../components/DeleteTripModal';
 import { Feather } from '@expo/vector-icons';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const TripDetailsScreen = () => {
   const route = useRoute();
@@ -161,6 +164,13 @@ const TripDetailsScreen = () => {
         <Feather name="trash-2" size={24} color="#FF5252" />
       </TouchableOpacity>
     );
+  };
+
+  const navigateToChatRoom = () => {
+    navigation.navigate("ChatRoomScreen", {
+      tripId: trip._id,
+      tripName: trip.title,
+    });
   };
 
   if (!tripId || loading || !trip) {
@@ -538,6 +548,15 @@ const TripDetailsScreen = () => {
           )}
         </View>
       </Animated.ScrollView>
+
+      {/* Floating Chat Button */}
+      <TouchableOpacity 
+        style={styles.chatButton}
+        onPress={navigateToChatRoom}
+        activeOpacity={0.8}
+      >
+        <MaterialIcons name="chat" size={28} color="#fff" />
+      </TouchableOpacity>
 
       <DeleteTripModal
         visible={showDeleteModal}
@@ -1036,6 +1055,26 @@ const styles = StyleSheet.create({
     color: '#FF5252',
     fontSize: 16,
     fontWeight: '600',
+  },
+  chatButton: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#4CAF50',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    zIndex: 1000,
   },
 });
 
