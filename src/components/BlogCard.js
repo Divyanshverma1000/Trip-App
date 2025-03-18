@@ -6,9 +6,9 @@ import { Feather } from '@expo/vector-icons';
 const BlogCard = ({ blog, style, onPress }) => {
   // Use coverPhoto if available, otherwise use first photo or placeholder
   const coverPhotoUrl = 
-    blog.blogCoverPhoto || (blog.photos && blog.photos.length > 0 
+    blog.coverPhoto || (blog.photos && blog.photos.length > 0 
       ? blog.photos[0].url 
-      : 'https://via.placeholder.com/200x120');
+      : 'default: "https://media.istockphoto.com/id/1381637603/photo/mountain-landscape.jpg?s=612x612&w=0&k=20&c=w64j3fW8C96CfYo3kbi386rs_sHH_6BGe8lAAAFS-y4="');
 
   // Calculate average rating
   const avgRating = blog.ratings.length > 0 
