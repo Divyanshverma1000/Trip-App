@@ -30,6 +30,7 @@ import {
 } from "@expo/vector-icons";
 import { AuthContext } from "../navigation/AppNavigator";
 
+
 const BlogDetailsScreen = () => {
   const { user } = useContext(AuthContext);
   const route = useRoute();
@@ -188,9 +189,16 @@ const BlogDetailsScreen = () => {
     <View key={question._id} style={styles.questionContainer}>
       <View style={styles.questionHeader}>
         <View style={styles.profilePicPlaceholder}>
-          <Text style={styles.profilePicText}>
-            {question.askedBy.name.charAt(0)}
-          </Text>
+          {question.askedBy.photo ? (
+            <Image
+              source={{ uri: question.askedBy.photo }}
+              style={styles.profilePicImage} // Define this in your styles
+            />
+          ) : (
+            <Text style={styles.profilePicText}>
+              {question.askedBy.name.charAt(0)}
+            </Text>
+          )}
         </View>
         <View style={styles.questionInfo}>
           <Text style={styles.questionAuthor}>{question.askedBy.name}</Text>
@@ -202,9 +210,16 @@ const BlogDetailsScreen = () => {
           {question.answers.map((answer) => (
             <View key={answer.createdAt} style={styles.answerContainer}>
               <View style={styles.profilePicPlaceholderSmall}>
-                <Text style={styles.profilePicText}>
-                  {answer.answeredBy.name.charAt(0)}
-                </Text>
+                {answer.answeredBy.photo ? (
+                  <Image
+                    source={{ uri: answer.answeredBy.photo }}
+                    style={styles.profilePicImageSmall} // Define this in your styles
+                  />
+                ) : (
+                  <Text style={styles.profilePicText}>
+                    {answer.answeredBy.name.charAt(0)}
+                  </Text>
+                )}
               </View>
               <View style={styles.answerInfo}>
                 <Text style={styles.answerAuthor}>
@@ -224,6 +239,7 @@ const BlogDetailsScreen = () => {
       </TouchableOpacity>
     </View>
   );
+  
 
   const displayedQuestions = showAllQuestions
     ? questions
@@ -1353,6 +1369,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
   },
+  profilePicImage: {
+  width: 40, 
+  height: 40, 
+  borderRadius: 20,
+  },
+  profilePicImageSmall: {
+    width: 30, 
+    height: 30, 
+    borderRadius: 15,
+  },
+
 });
 
 export default BlogDetailsScreen;
