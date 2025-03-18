@@ -88,6 +88,9 @@ const CreateBlogPhotosScreen = ({ route, navigation }) => {
     formData.append('description', blogData.description || '');
     formData.append('recommendations', blogData.recommendations || '');
     formData.append('advisory', blogData.advisory || '');
+    if(formData.concerns){
+      formData.append('concerns', blogData.concerns);
+    }
     // formData.append('tags', JSON.stringify(blogData.tags || []));
      // Append tags correctly - append each tag individually
   if (blogData.tags && blogData.tags.length > 0) {
