@@ -12,6 +12,7 @@ import {
   Modal,
 } from "react-native";
 import Animated, { useSharedValue, FadeInUp } from "react-native-reanimated";
+import Icon from "react-native-vector-icons/MaterialIcons";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import {
   getBlogPostById,
@@ -235,7 +236,33 @@ const BlogDetailsScreen = () => {
       >
         <View style={styles.content}>
           {/* Title */}
-          <Text style={styles.title}>{blog.title}</Text>
+          <View style={styles.sectionContainer}>
+            <Text style={styles.title}>{blog.title}</Text>
+            {blog.host && (
+              <View style={styles.hostCard}>
+                <Text style={styles.sectionTitle}>
+                  <MaterialIcons name="person" size={24} color="#6366F1" />
+                  {"Posted by:"}
+                </Text>
+                <View style={styles.hostContainer}>
+                  {blog.host.photo && (
+                    <Image
+                      source={{ uri: blog.host.photo }}
+                      style={styles.hostImage}
+                    />
+                  )}
+                  <View style={styles.hostInfo}>
+                    <Text style={styles.hostName}>{blog.host.name}</Text>
+                    <Text style={styles.hostEmail}>{blog.host.email}</Text>
+                    <TouchableOpacity style={styles.contactButton}>
+                      <MaterialIcons name="mail" size={20} color="#FFF" />
+                      <Text style={styles.contactButtonText}> Contact</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            )}
+          </View>
 
           {/* Summary Section */}
           {blog.summary && (
@@ -325,6 +352,125 @@ const BlogDetailsScreen = () => {
             </View>
           )}
 
+          {/* Concerns */}
+          {blog.concerns && (
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionHeader}>Concerns</Text>
+              <View style={styles.concernsContainer}>
+                {blog.concerns.womenSafety && (
+                  <View style={styles.concernItem}>
+                    <View style={styles.iconContainer}>
+                      <Icon name="shield" size={16} color="#E91E63" />
+                    </View>
+                    <Text style={styles.concernLabel}>Women Safety:</Text>
+                    <View style={styles.ratingContainer}>
+                      {[...Array(5)].map((_, i) => (
+                        <Icon
+                          key={i}
+                          name={
+                            i < blog.concerns.womenSafety
+                              ? "star"
+                              : "star-outline"
+                          }
+                          size={14}
+                          color={
+                            i < blog.concerns.womenSafety
+                              ? "#E91E63"
+                              : "#BDBDBD"
+                          }
+                          style={styles.starIcon}
+                        />
+                      ))}
+                    </View>
+                  </View>
+                )}
+                {blog.concerns.affordability && (
+                  <View style={styles.concernItem}>
+                    <View style={styles.iconContainer}>
+                      <Icon name="wallet" size={16} color="#4CAF50" />
+                    </View>
+                    <Text style={styles.concernLabel}>Affordability:</Text>
+                    <View style={styles.ratingContainer}>
+                      {[...Array(5)].map((_, i) => (
+                        <Icon
+                          key={i}
+                          name={
+                            i < blog.concerns.affordability
+                              ? "star"
+                              : "star-outline"
+                          }
+                          size={14}
+                          color={
+                            i < blog.concerns.affordability
+                              ? "#4CAF50"
+                              : "#BDBDBD"
+                          }
+                          style={styles.starIcon}
+                        />
+                      ))}
+                    </View>
+                  </View>
+                )}
+                {blog.concerns.culturalExperience && (
+                  <View style={styles.concernItem}>
+                    <View style={styles.iconContainer}>
+                      <Icon name="celebration" size={16} color="#FF9800" />
+                    </View>
+                    <Text style={styles.concernLabel}>
+                      Cultural Experience:
+                    </Text>
+                    <View style={styles.ratingContainer}>
+                      {[...Array(5)].map((_, i) => (
+                        <Icon
+                          key={i}
+                          name={
+                            i < blog.concerns.culturalExperience
+                              ? "star"
+                              : "star-outline"
+                          }
+                          size={14}
+                          color={
+                            i < blog.concerns.culturalExperience
+                              ? "#FF9800"
+                              : "#BDBDBD"
+                          }
+                          style={styles.starIcon}
+                        />
+                      ))}
+                    </View>
+                  </View>
+                )}
+                {blog.concerns.accessibility && (
+                  <View style={styles.concernItem}>
+                    <View style={styles.iconContainer}>
+                      <Icon name="accessibility" size={16} color="#2196F3" />
+                    </View>
+                    <Text style={styles.concernLabel}>Accessibility:</Text>
+                    <View style={styles.ratingContainer}>
+                      {[...Array(5)].map((_, i) => (
+                        <Icon
+                          key={i}
+                          name={
+                            i < blog.concerns.accessibility
+                              ? "star"
+                              : "star-outline"
+                          }
+                          size={14}
+                          color={
+                            i < blog.concerns.accessibility
+                              ? "#2196F3"
+                              : "#BDBDBD"
+                          }
+                          style={styles.starIcon}
+                        />
+                      ))}
+                    </View>
+                  </View>
+                )}
+              </View>
+            </View>
+          )}
+
           {/* Photo Gallery */}
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionHeader}>Photos</Text>
@@ -392,49 +538,6 @@ const BlogDetailsScreen = () => {
               )}
             </View>
           ) : null}
-
-          {/* Concerns */}
-          {blog.concerns && (
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionHeader}>Concerns</Text>
-              <View style={styles.concernsContainer}>
-                {blog.concerns.womenSafety && (
-                  <View style={styles.concernItem}>
-                    <Text style={styles.concernLabel}>Women Safety:</Text>
-                    <Text style={styles.concernValue}>
-                      {blog.concerns.womenSafety}/5
-                    </Text>
-                  </View>
-                )}
-                {blog.concerns.affordability && (
-                  <View style={styles.concernItem}>
-                    <Text style={styles.concernLabel}>Affordability:</Text>
-                    <Text style={styles.concernValue}>
-                      {blog.concerns.affordability}/5
-                    </Text>
-                  </View>
-                )}
-                {blog.concerns.culturalExperience && (
-                  <View style={styles.concernItem}>
-                    <Text style={styles.concernLabel}>
-                      Cultural Experience:
-                    </Text>
-                    <Text style={styles.concernValue}>
-                      {blog.concerns.culturalExperience}/5
-                    </Text>
-                  </View>
-                )}
-                {blog.concerns.accessibility && (
-                  <View style={styles.concernItem}>
-                    <Text style={styles.concernLabel}>Accessibility:</Text>
-                    <Text style={styles.concernValue}>
-                      {blog.concerns.accessibility}/5
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </View>
-          )}
 
           {/* Trip Details & Itinerary */}
           {blog.trip && (
@@ -701,10 +804,24 @@ const BlogDetailsScreen = () => {
   );
 };
 
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
-  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-  header: { position: "absolute", top: 40, left: 20, zIndex: 1 },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    padding: 16, // Add inner spacing for overall layout
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  header: {
+    position: "absolute",
+    top: 40,
+    left: 20,
+    zIndex: 10,
+  },
   backButton: {
     width: 40,
     height: 40,
@@ -713,80 +830,185 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  coverImage: { width: "100%", height: 300 },
-  scrollView: { marginTop: 0 },
-  content: { padding: 16 },
-  title: { fontSize: 26, fontWeight: "bold", marginBottom: 16, color: "#333" },
-  sectionContainer: { marginBottom: 24 },
+  coverImage: { 
+    width: "100%", 
+    height: 300 
+  },
+  scrollView: { 
+    marginTop: 0 
+  },
+  content: { 
+    padding: 16 
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: "bold",
+    marginBottom: 16,
+    color: "#333",
+  },
+  sectionContainer: { 
+    marginBottom: 24 
+  },
   sectionHeader: {
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 8,
     color: "#4CAF50",
   },
-  sectionText: { fontSize: 16, color: "#555", lineHeight: 24 },
-  summary: { fontSize: 16, marginBottom: 16, color: "#444" },
-  author: { fontSize: 16, color: "#666", marginBottom: 16 },
+  sectionText: {
+    fontSize: 16,
+    color: "#555",
+    lineHeight: 24,
+  },
+  summary: {
+    fontSize: 16,
+    marginBottom: 16,
+    color: "#444",
+  },
+  author: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 16,
+  },
   ratingDisplay: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 16,
   },
-  averageRatingText: { fontSize: 16, fontWeight: "600" },
-  starContainer: { flexDirection: "row", marginLeft: 8 },
+  averageRatingText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  starContainer: {
+    flexDirection: "row",
+    marginLeft: 8,
+  },
   ratingSubmission: {
     marginBottom: 16,
     padding: 12,
     backgroundColor: "#f0f0f0",
     borderRadius: 8,
   },
-  ratingSubmissionText: { fontSize: 16, marginBottom: 8 },
-  starSubmissionContainer: { flexDirection: "row" },
-  starIcon: { marginHorizontal: 4 },
-  description: { fontSize: 16, marginBottom: 16, color: "#444" },
-  sectionTitle: { fontSize: 20, fontWeight: "bold", marginVertical: 16 },
-  sectionContent: { fontSize: 16, color: "#444", marginBottom: 16 },
-  tripDetails: { marginTop: 16 },
+  ratingSubmissionText: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  starSubmissionContainer: { 
+    flexDirection: "row" 
+  },
+  starIcon: { 
+    marginHorizontal: 4 
+  },
+  description: {
+    fontSize: 16,
+    marginBottom: 16,
+    color: "#444",
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginVertical: 16,
+  },
+  sectionContent: {
+    fontSize: 16,
+    color: "#444",
+    marginBottom: 16,
+  },
+  tripDetails: { 
+    marginTop: 16 
+  },
   metadata: {
     flexDirection: "row",
     justifyContent: "space-around",
     marginBottom: 16,
   },
-  metadataItem: { alignItems: "center" },
+  metadataItem: { 
+    alignItems: "center" 
+  },
   itinerary: {},
   dayCard: {
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#fff", // White background for a clean card look
     borderRadius: 8,
     marginBottom: 12,
-    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    shadowColor: "#000", // iOS shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3, // Android shadow
   },
   dayHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 16,
+    backgroundColor: "#f9f9f9",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
   },
-  dayHeaderLeft: { flex: 1, marginRight: 8 },
-  dayTitle: { fontSize: 18, fontWeight: "600", marginBottom: 4 },
-  dayPreview: { fontSize: 14, color: "#666" },
-  dayDetails: { padding: 16, backgroundColor: "#fff" },
-  dayNotes: { fontSize: 16, marginBottom: 12 },
+  dayHeaderLeft: {
+    flex: 1,
+    marginRight: 8,
+  },
+  dayTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 4,
+    color: "#333",
+  },
+  dayPreview: { 
+    fontSize: 14, 
+    color: "#666" 
+  },
+  dayDetails: {
+    padding: 16,
+    backgroundColor: "#fff",
+  },
+  dayNotes: {
+    fontSize: 16,
+    marginBottom: 12,
+    color: "#555",
+  },
   detailSection: {
     marginVertical: 12,
-    backgroundColor: "#f8f8f8",
+    backgroundColor: "#fff",
     padding: 12,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#eee",
   },
   detailTitleContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 8,
   },
-  detailTitle: { fontSize: 16, fontWeight: "600", marginLeft: 8 },
-  hotelName: { fontSize: 16, color: "#6366F1", marginBottom: 4 },
-  detailText: { fontSize: 14, color: "#666", marginBottom: 4 },
-  detailMeta: { fontSize: 13, color: "#888", marginTop: 2 },
-  ratingContainer: { flexDirection: "row", alignItems: "center", marginTop: 4 },
+  detailTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginLeft: 8,
+    color: "#333",
+  },
+  hotelName: {
+    fontSize: 16,
+    color: "#6366F1",
+    marginBottom: 4,
+  },
+  detailText: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 4,
+  },
+  detailMeta: {
+    fontSize: 13,
+    color: "#888",
+    marginTop: 2,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+  },
   placeItem: {
     marginBottom: 12,
     paddingBottom: 8,
@@ -805,7 +1027,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
   },
-  restaurantName: { fontSize: 15, fontWeight: "600", color: "#6366F1" },
+  restaurantName: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#6366F1",
+  },
   mealType: {
     fontSize: 13,
     color: "#888",
@@ -824,7 +1050,10 @@ const styles = StyleSheet.create({
     color: "#6366F1",
     marginBottom: 4,
   },
-  errorText: { fontSize: 16, color: "red" },
+  errorText: {
+    fontSize: 16,
+    color: "red",
+  },
   qaSection: {
     marginTop: 32,
     borderTopWidth: 1,
@@ -839,9 +1068,11 @@ const styles = StyleSheet.create({
   },
   questionContainer: {
     marginBottom: 16,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#fff",
     padding: 12,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#eee",
   },
   questionHeader: {
     flexDirection: "row",
@@ -866,22 +1097,53 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 8,
   },
-  profilePicText: { color: "#fff", fontWeight: "bold" },
+  profilePicText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
   questionInfo: {},
-  questionAuthor: { fontSize: 16, fontWeight: "600", color: "#333" },
-  questionText: { fontSize: 14, color: "#555" },
-  answersContainer: { marginLeft: 48, marginTop: 8 },
+  questionAuthor: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+  },
+  questionText: {
+    fontSize: 14,
+    color: "#555",
+  },
+  answersContainer: {
+    marginLeft: 48,
+    marginTop: 8,
+  },
   answerContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 8,
   },
   answerInfo: {},
-  answerAuthor: { fontSize: 14, fontWeight: "600", color: "#333" },
-  answerText: { fontSize: 13, color: "#555" },
-  answerButton: { alignSelf: "flex-end", marginTop: 8 },
-  answerButtonText: { fontSize: 14, color: "#4CAF50", fontWeight: "600" },
-  seeMoreText: { color: "#4CAF50", textAlign: "center", marginTop: 8 },
+  answerAuthor: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+  },
+  answerText: {
+    fontSize: 13,
+    color: "#555",
+  },
+  answerButton: {
+    alignSelf: "flex-end",
+    marginTop: 8,
+  },
+  answerButtonText: {
+    fontSize: 14,
+    color: "#4CAF50",
+    fontWeight: "600",
+  },
+  seeMoreText: {
+    color: "#4CAF50",
+    textAlign: "center",
+    marginTop: 8,
+  },
   askQuestionContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -901,7 +1163,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 8,
   },
-  askQuestionButtonText: { color: "#fff", fontWeight: "600" },
+  askQuestionButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+  },
   modalContainer: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -914,7 +1179,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: "80%",
   },
-  modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 12 },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
+  },
   modalInput: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -928,17 +1197,52 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 16,
   },
-  modalButton: { padding: 8 },
-  modalButtonText: { fontSize: 16, color: "#4CAF50", fontWeight: "600" },
-  photoContainer: { marginRight: 12 },
-  photo: { width: 150, height: 150, borderRadius: 8 },
-  photoCaption: { fontSize: 12, color: "#555", marginTop: 4 },
-  noPhotos: { justifyContent: "center", alignItems: "center", height: 150 },
-  noPhotosText: { color: "#ccc", marginTop: 8 },
-  contactItem: { marginBottom: 12 },
-  contactLabel: { fontSize: 16, fontWeight: "600", color: "#333" },
-  contactText: { fontSize: 14, color: "#555" },
-  tagsContainer: { flexDirection: "row", flexWrap: "wrap" },
+  modalButton: { 
+    padding: 8 
+  },
+  modalButtonText: {
+    fontSize: 16,
+    color: "#4CAF50",
+    fontWeight: "600",
+  },
+  photoContainer: { 
+    marginRight: 12 
+  },
+  photo: {
+    width: 150,
+    height: 150,
+    borderRadius: 8,
+  },
+  photoCaption: {
+    fontSize: 12,
+    color: "#555",
+    marginTop: 4,
+  },
+  noPhotos: {
+    justifyContent: "center",
+    alignItems: "center",
+    height: 150,
+  },
+  noPhotosText: {
+    color: "#ccc",
+    marginTop: 8,
+  },
+  contactItem: { 
+    marginBottom: 12 
+  },
+  contactLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+  },
+  contactText: {
+    fontSize: 14,
+    color: "#555",
+  },
+  tagsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
   tag: {
     backgroundColor: "#eee",
     paddingHorizontal: 12,
@@ -947,21 +1251,93 @@ const styles = StyleSheet.create({
     marginRight: 8,
     marginBottom: 8,
   },
-  tagText: { fontSize: 14, color: "#4CAF50" },
-  concernsContainer: { flexDirection: "row", flexWrap: "wrap" },
+  tagText: {
+    fontSize: 14,
+    color: "#4CAF50",
+  },
+  concernsContainer: {
+    marginTop: 8,
+  },
   concernItem: {
     flexDirection: "row",
     alignItems: "center",
-    marginRight: 16,
-    marginBottom: 8,
+    marginBottom: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#eee",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+    elevation: 1,
+  },
+  iconContainer: {
+    marginRight: 8,
   },
   concernLabel: {
     fontSize: 14,
     fontWeight: "600",
     color: "#333",
     marginRight: 4,
+    flex: 1,
   },
-  concernValue: { fontSize: 14, color: "#555" },
+  starIcon: {
+    marginHorizontal: 1,
+  },
+  hostCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  hostContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  hostImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginRight: 16,
+  },
+  hostInfo: { 
+    flex: 1 
+  },
+  hostName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#1F2937",
+    marginBottom: 4,
+  },
+  hostEmail: {
+    fontSize: 16,
+    color: "#6B7280",
+    marginBottom: 12,
+  },
+  contactButton: {
+    backgroundColor: "#6366F1",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  contactButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
 });
 
 export default BlogDetailsScreen;

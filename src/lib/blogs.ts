@@ -35,6 +35,7 @@ export interface BlogPost {
     _id: string;
     name: string;
     email: string;
+    photo: string;
   };
   title: string;
   summary?: string;
