@@ -50,6 +50,9 @@ const BlogDetailsScreen = () => {
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [answerText, setAnswerText] = useState("");
 
+  // Local state for current user's rating (optimistic update)
+  const [userRating, setUserRating] = useState(0);
+
   useEffect(() => {
     if (blogId) {
       setLoading(true);
@@ -67,6 +70,16 @@ const BlogDetailsScreen = () => {
       setLoading(false);
     }
   }, [blogId]);
+
+  // Update local userRating when blog data changes
+  useEffect(() => {
+    if (blog && blog.ratings) {
+      const foundRating = blog.ratings.find(
+        (rating) => String(rating.user._id) === String(user.id)
+      );
+      setUserRating(foundRating ? foundRating.value : 0);
+    }
+  }, [blog, user.id]);
 
   const fetchQuestions = async () => {
     try {
@@ -101,29 +114,33 @@ const BlogDetailsScreen = () => {
     return (sum / blog.ratings.length).toFixed(1);
   };
 
-  const currentUserRating =
-    blog.ratings.find((rating) => rating.user._id === user.id)?.value || 0;
-
   const handleRatingSubmit = async (value) => {
     if (ratingSubmitting) return;
+
+    // Optimistically update UI
+    setUserRating(value);
     setRatingSubmitting(true);
     try {
       let response;
-      if (currentUserRating) {
+      // If a rating already exists (userRating is not 0), update it; otherwise, create one.
+      if (userRating) {
         response = await updateBlogRating(blog._id, value);
       } else {
         response = await rateBlogPost(blog._id, value);
       }
-      // Update local state manually:
-      const updatedRatings = blog.ratings.find(
-        (rating) => rating.user._id === user.id
-      )
-        ? blog.ratings.map((rating) =>
-            rating.user._id === user.id ? { ...rating, value } : rating
-          )
-        : [...blog.ratings, { user, value }];
+      // Update local blog state manually:
+      const userId = String(user.id);
+      const index = blog.ratings.findIndex(
+        (rating) => String(rating.user._id) === userId
+      );
+      const updatedRatings = [...blog.ratings];
+      if (index !== -1) {
+        updatedRatings[index] = { ...updatedRatings[index], value };
+      } else {
+        updatedRatings.push({ user, value });
+      }
       setBlog({ ...blog, ratings: updatedRatings });
-      Alert.alert("Success", "Rating submitted successfully");
+      // Alert.alert("Success", "Rating submitted successfully");
     } catch (error) {
       console.error("Rating submission failed:", error);
       Alert.alert("Error", "Could not submit rating");
@@ -296,7 +313,9 @@ const BlogDetailsScreen = () => {
             </View>
             {canRate && (
               <View style={styles.ratingSubmission}>
-                <Text style={styles.ratingSubmissionText}>Rate this post:</Text>
+                <Text style={styles.ratingSubmissionText}>
+                  Rate this post:
+                </Text>
                 <View style={styles.starSubmissionContainer}>
                   {[1, 2, 3, 4, 5].map((star) => (
                     <TouchableOpacity
@@ -304,7 +323,7 @@ const BlogDetailsScreen = () => {
                       onPress={() => handleRatingSubmit(star)}
                       disabled={ratingSubmitting}
                     >
-                      {star <= currentUserRating ? (
+                      {star <= userRating ? (
                         <MaterialIcons
                           name="star"
                           size={32}
@@ -553,11 +572,7 @@ const BlogDetailsScreen = () => {
                   <Text>{blog.trip.metadata.duration} days</Text>
                 </View>
                 <View style={styles.metadataItem}>
-                  <MaterialIcons
-                    name="attach-money"
-                    size={24}
-                    color="#6366F1"
-                  />
+                  <MaterialIcons name="attach-money" size={24} color="#6366F1" />
                   <Text>${blog.trip.metadata.cost}</Text>
                 </View>
               </View>
