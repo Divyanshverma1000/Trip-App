@@ -147,7 +147,7 @@ const AppNavigator = () => {
                 <Stack.Screen name="Feed" component={FeedScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} />
                 <Stack.Screen 
-                  name="ChatRoom" 
+                  name="ChatRoomScreen" 
                   component={ChatRoomScreen}
                   options={{ headerShown: false }}
                 />

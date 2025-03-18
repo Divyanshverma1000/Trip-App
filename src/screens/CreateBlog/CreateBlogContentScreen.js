@@ -19,12 +19,12 @@ const CreateBlogContentScreen = ({ navigation }) => {
     description: '',
     recommendations: '',
     advisory: '',
-    concerns: {
-      womenSafety: 0,
-      affordability: 0,
-      culturalExperience: 0,
-      accessibility: 0,
-    },
+    // concerns: {
+    //   womenSafety: 0,
+    //   affordability: 0,
+    //   culturalExperience: 0,
+    //   accessibility: 0,
+    // },
   });
 
   const [errors, setErrors] = useState({});
@@ -130,11 +130,11 @@ const CreateBlogContentScreen = ({ navigation }) => {
 
           <View style={styles.sectionDivider} />
 
-          <Text style={styles.sectionTitle}>Rate Your Concerns</Text>
+          {/* <Text style={styles.sectionTitle}>Rate Your Concerns</Text>
           {renderRatingInput('womenSafety', 'Women Safety')}
           {renderRatingInput('affordability', 'Affordability')}
           {renderRatingInput('culturalExperience', 'Cultural Experience')}
-          {renderRatingInput('accessibility', 'Accessibility')}
+          {renderRatingInput('accessibility', 'Accessibility')} */}
         </ScrollView>
 
         <View style={styles.footer}>
