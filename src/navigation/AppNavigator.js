@@ -27,6 +27,7 @@ import ItineraryPlanningScreen from '../screens/ItineraryPlanningScreen';
 import CreateBlogNavigator from './CreateBlogNavigator';
 import FeedScreen from '../screens/FeedScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import MyBlogsScreen from '../screens/MyBlogsScreen';
 export const navigationRef = createNavigationContainerRef();
 export const AuthContext = createContext({
   isAuthenticated: false,
@@ -44,6 +45,7 @@ const Stack = createStackNavigator();
 
 const AppNavigator = () => {
   const [loading, setLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
   const [error, setError] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
@@ -82,21 +84,43 @@ const AppNavigator = () => {
   };
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const initializeApp = async () => {
       try {
+        // Minimum splash screen duration
+        const minimumSplashDuration = 2000; // 2 seconds
+        const startTime = Date.now();
+
+        // Check authentication
         const token = await getStorageItem('authToken');
         const storedUser = await getStorageItem('userData');
+        
         if (token && storedUser) {
           setUser(JSON.parse(storedUser));
           setIsAuthenticated(true);
         }
+
+        // Calculate remaining time to meet minimum duration
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = Math.max(0, minimumSplashDuration - elapsedTime);
+
+        // Ensure splash screen shows for at least minimumSplashDuration
+        await new Promise(resolve => setTimeout(resolve, remainingTime));
+
+        setLoading(false);
+        
+        // Add a small delay before hiding splash screen for smooth transition
+        setTimeout(() => {
+          setShowSplash(false);
+        }, 500);
+
       } catch (error) {
-        console.error('Error checking auth:', error);
+        console.error('Error initializing app:', error);
+        setLoading(false);
+        setShowSplash(false);
       }
-      setLoading(false);
     };
 
-    checkAuth();
+    initializeApp();
   }, []);
 
   useEffect(() => {
@@ -119,7 +143,8 @@ const AppNavigator = () => {
     clearError
   };
 
-  if (loading) {
+  // Show splash screen during initial load
+  if (showSplash || loading) {
     return <SplashScreen />;
   }
 
@@ -145,7 +170,7 @@ const AppNavigator = () => {
                 <Stack.Screen name="ItineraryPlanning" component={ItineraryPlanningScreen} />
                 <Stack.Screen name="CreateTrip" component={CreateTripScreen} />
                 <Stack.Screen name="Feed" component={FeedScreen} />
-                <Stack.Screen name="Profile" component={ProfileScreen} />
+                <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
                 <Stack.Screen 
                   name="ChatRoomScreen" 
                   component={ChatRoomScreen}
@@ -157,7 +182,17 @@ const AppNavigator = () => {
                   component={CreateBlogNavigator}
                   options={{ headerShown: false }}
                 />
-    
+                <Stack.Screen 
+                  name="MyBlogsScreen" 
+                  component={MyBlogsScreen}
+                  options={{
+                    title: 'My Blogs',
+                    headerStyle: {
+                      backgroundColor: '#4CAF50',
+                    },
+                    headerTintColor: '#fff',
+                  }}
+                />
               </>
             ) : (
               <>

@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   Alert,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -15,13 +16,15 @@ import { createBlogPost } from '../../lib/blogs';
 import { AuthContext } from '../../navigation/AppNavigator';
 import { getMyTrips } from '../../lib/trips';
 import { useContext } from 'react';
-const CreateBlogTripScreen = ({ route, navigation }) => {
+import Toast from 'react-native-toast-message';
+
+const CreateBlogTripScreen = ({ navigation, route }) => {
   const { blogData } = route.params;
   const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [userTrips, setUserTrips] = useState([]);
-  const [selectedOption, setSelectedOption] = useState(null); // 'no-trip', 'existing-trip', 'new-trip'
   const [selectedTripId, setSelectedTripId] = useState(null);
+  const [selectedOption, setSelectedOption] = useState(null); // Track which option is selected
 
   useEffect(() => {
     fetchUserTrips();
@@ -36,10 +39,23 @@ const CreateBlogTripScreen = ({ route, navigation }) => {
     }
   };
 
+  const handleCreateNewTrip = () => {
+    navigation.navigate('CreateTrip', {
+      fromBlogCreation: true,
+      onTripCreated: (newTrip) => {
+        setSelectedTripId(newTrip._id);
+        setSelectedOption('new'); // Set selected option to 'new'
+        Toast.show({
+          type: 'success',
+          text1: 'Trip selected for blog'
+        });
+      }
+    });
+  };
+
   const handleCreateBlog = async () => {
     setLoading(true);
     try {
-      // If a trip is selected, append it to the FormData
       if (selectedTripId) {
         blogData.append('tripId', selectedTripId);
       }
@@ -64,36 +80,26 @@ const CreateBlogTripScreen = ({ route, navigation }) => {
     }
   };
 
-  const handleNewTrip = () => {
-    // Navigate to trip creation screen with callback
-    navigation.navigate('CreateTrip', {
-      onTripCreated: (tripId) => {
-        setSelectedTripId(tripId);
-        setSelectedOption('existing-trip');
-      }
-    });
-  };
-
   const renderTripOption = () => (
     <View style={styles.optionsContainer}>
       <TouchableOpacity
         style={[
           styles.optionButton,
-          selectedOption === 'no-trip' && styles.optionButtonSelected
+          selectedOption === 'none' && styles.optionButtonSelected
         ]}
         onPress={() => {
-          setSelectedOption('no-trip');
           setSelectedTripId(null);
+          setSelectedOption('none');
         }}
       >
         <MaterialIcons
           name="post-add"
           size={24}
-          color={selectedOption === 'no-trip' ? '#FFF' : '#666'}
+          color={selectedOption === 'none' ? '#FFF' : '#666'}
         />
         <Text style={[
           styles.optionText,
-          selectedOption === 'no-trip' && styles.optionTextSelected
+          selectedOption === 'none' && styles.optionTextSelected
         ]}>
           Create Blog Without Trip
         </Text>
@@ -102,18 +108,21 @@ const CreateBlogTripScreen = ({ route, navigation }) => {
       <TouchableOpacity
         style={[
           styles.optionButton,
-          selectedOption === 'existing-trip' && styles.optionButtonSelected
+          selectedOption === 'existing' && styles.optionButtonSelected
         ]}
-        onPress={() => setSelectedOption('existing-trip')}
+        onPress={() => {
+          setSelectedTripId(null);
+          setSelectedOption('existing');
+        }}
       >
         <MaterialIcons
           name="collections-bookmark"
           size={24}
-          color={selectedOption === 'existing-trip' ? '#FFF' : '#666'}
+          color={selectedOption === 'existing' ? '#FFF' : '#666'}
         />
         <Text style={[
           styles.optionText,
-          selectedOption === 'existing-trip' && styles.optionTextSelected
+          selectedOption === 'existing' && styles.optionTextSelected
         ]}>
           Select Existing Trip
         </Text>
@@ -122,21 +131,22 @@ const CreateBlogTripScreen = ({ route, navigation }) => {
       <TouchableOpacity
         style={[
           styles.optionButton,
-          selectedOption === 'new-trip' && styles.optionButtonSelected
+          selectedOption === 'new' && styles.optionButtonSelected
         ]}
         onPress={() => {
-          setSelectedOption('new-trip');
-          handleNewTrip();
+          setSelectedTripId(null);
+          setSelectedOption('new');
+          handleCreateNewTrip();
         }}
       >
         <MaterialIcons
           name="add-location"
           size={24}
-          color={selectedOption === 'new-trip' ? '#FFF' : '#666'}
+          color={selectedOption === 'new' ? '#FFF' : '#666'}
         />
         <Text style={[
           styles.optionText,
-          selectedOption === 'new-trip' && styles.optionTextSelected
+          selectedOption === 'new' && styles.optionTextSelected
         ]}>
           Create New Trip
         </Text>
@@ -157,11 +167,17 @@ const CreateBlogTripScreen = ({ route, navigation }) => {
             ]}
             onPress={() => setSelectedTripId(trip._id)}
           >
-            <Text style={styles.tripTitle}>{trip.title}</Text>
-            <Text style={styles.tripDates}>
-              {new Date(trip.startDate).toLocaleDateString()} - 
-              {new Date(trip.endDate).toLocaleDateString()}
-            </Text>
+            <Image 
+              source={trip.coverPhoto ? {uri: trip.coverPhoto} : require('../../../assets/bali.jpg')}
+              style={styles.tripCoverPhoto}
+            />
+            <View style={styles.tripInfo}>
+              <Text style={styles.tripTitle}>{trip.title}</Text>
+              <Text style={styles.tripDates}>
+                {new Date(trip.startDate).toLocaleDateString()} - 
+                {new Date(trip.endDate).toLocaleDateString()}
+              </Text>
+            </View>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -177,7 +193,7 @@ const CreateBlogTripScreen = ({ route, navigation }) => {
 
       <ScrollView style={styles.content}>
         {renderTripOption()}
-        {selectedOption === 'existing-trip' && renderExistingTrips()}
+        {selectedOption === 'existing' && renderExistingTrips()}
       </ScrollView>
 
       <View style={styles.footer}>
@@ -266,15 +282,26 @@ const styles = StyleSheet.create({
     maxHeight: 300,
   },
   tripItem: {
-    padding: 16,
+    padding: 12,
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
     marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   tripItemSelected: {
     borderColor: '#4CAF50',
     backgroundColor: '#E8F5E9',
+  },
+  tripCoverPhoto: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  tripInfo: {
+    flex: 1,
   },
   tripTitle: {
     fontSize: 16,
@@ -316,4 +343,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CreateBlogTripScreen; 
+export default CreateBlogTripScreen;

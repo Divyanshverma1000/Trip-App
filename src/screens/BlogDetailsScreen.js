@@ -558,188 +558,51 @@ const BlogDetailsScreen = () => {
             </View>
           ) : null}
 
-          {/* Trip Details & Itinerary */}
+          {/* Trip Details */}
           {blog.trip && (
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionHeader}>Trip Details</Text>
-              <View style={styles.metadata}>
-                <View style={styles.metadataItem}>
-                  <MaterialIcons name="location-on" size={24} color="#6366F1" />
-                  <Text>{blog.trip.metadata.destination}</Text>
+              <TouchableOpacity 
+                style={styles.tripCardContainer}
+                onPress={() => navigation.navigate('TripDetailsScreen', { tripId: blog.trip._id })}
+              >
+                <View style={styles.tripCardHeader}>
+                  <Text style={styles.tripCardTitle}>{blog.trip.title || "Trip Overview"}</Text>
+                  <View style={styles.viewDetailsButton}>
+                    <Text style={styles.viewDetailsText}>View Full Trip</Text>
+                    <MaterialIcons name="arrow-forward" size={18} color="#6366F1" />
+                  </View>
                 </View>
-                <View style={styles.metadataItem}>
-                  <MaterialIcons name="timer" size={24} color="#6366F1" />
-                  <Text>{blog.trip.metadata.duration} days</Text>
+
+                <View style={styles.tripCardContent}>
+                  <View style={styles.metadata}>
+                    <View style={styles.metadataItem}>
+                      <MaterialIcons name="location-on" size={24} color="#6366F1" />
+                      <Text style={styles.metadataText}>{blog.trip.metadata?.destination || "Unknown location"}</Text>
+                    </View>
+                    <View style={styles.metadataItem}>
+                      <MaterialIcons name="timer" size={24} color="#6366F1" />
+                      <Text style={styles.metadataText}>{blog.trip.metadata?.duration || "?"} days</Text>
+                    </View>
+                    <View style={styles.metadataItem}>
+                      <MaterialIcons name="attach-money" size={24} color="#6366F1" />
+                      <Text style={styles.metadataText}>${blog.trip.metadata?.cost || blog.trip.estimatedBudget || "?"}</Text>
+                    </View>
+                  </View>
+                  
+                  {blog.trip.itinerary && blog.trip.itinerary.length > 0 && (
+                    <View style={styles.itineraryPreview}>
+                      <Text style={styles.itineraryPreviewTitle}>Itinerary Preview:</Text>
+                      <Text style={styles.itineraryPreviewText}>
+                        {blog.trip.itinerary.length} day{blog.trip.itinerary.length > 1 ? 's' : ''} planned
+                      </Text>
+                      <Text style={styles.itineraryPreviewSubtext}>
+                        Tap to see full itinerary details
+                      </Text>
+                    </View>
+                  )}
                 </View>
-                <View style={styles.metadataItem}>
-                  <MaterialIcons name="attach-money" size={24} color="#6366F1" />
-                  <Text>${blog.trip.metadata.cost}</Text>
-                </View>
-              </View>
-              {blog.trip.itinerary && blog.trip.itinerary.length > 0 && (
-                <View style={styles.itinerary}>
-                  <Text style={styles.sectionHeader}>Itinerary</Text>
-                  {blog.trip.itinerary.map((day, index) => (
-                    <TouchableOpacity
-                      key={day._id}
-                      style={styles.dayCard}
-                      onPress={() => toggleDayExpansion(index)}
-                    >
-                      <View style={styles.dayHeader}>
-                        <View style={styles.dayHeaderLeft}>
-                          <Text style={styles.dayTitle}>Day {day.day}</Text>
-                          <Text style={styles.dayPreview} numberOfLines={1}>
-                            {day.dayNotes}
-                          </Text>
-                        </View>
-                        <MaterialIcons
-                          name={
-                            expandedDay === index
-                              ? "expand-less"
-                              : "expand-more"
-                          }
-                          size={24}
-                          color="#6366F1"
-                        />
-                      </View>
-                      {expandedDay === index && (
-                        <Animated.View
-                          entering={FadeInUp}
-                          style={styles.dayDetails}
-                        >
-                          <Text style={styles.dayNotes}>{day.dayNotes}</Text>
-                          {day.stay && (
-                            <View style={styles.detailSection}>
-                              <View style={styles.detailTitleContainer}>
-                                <MaterialCommunityIcons
-                                  name="bed"
-                                  size={20}
-                                  color="#6366F1"
-                                />
-                                <Text style={styles.detailTitle}>Stay</Text>
-                              </View>
-                              <Text style={styles.hotelName}>
-                                {day.stay.hotelName}
-                              </Text>
-                              <Text style={styles.detailText}>
-                                {day.stay.description}
-                              </Text>
-                              <Text style={styles.detailMeta}>
-                                Address: {day.stay.address}
-                              </Text>
-                              <Text style={styles.detailMeta}>
-                                Cost: ${day.stay.cost}
-                              </Text>
-                              <View style={styles.ratingContainer}>
-                                <Text>Rating: </Text>
-                                {[...Array(day.stay.rating)].map((_, i) => (
-                                  <MaterialIcons
-                                    key={i}
-                                    name="star"
-                                    size={16}
-                                    color="#FFD700"
-                                  />
-                                ))}
-                              </View>
-                            </View>
-                          )}
-                          {day.places && day.places.length > 0 && (
-                            <View style={styles.detailSection}>
-                              <View style={styles.detailTitleContainer}>
-                                <FontAwesome5
-                                  name="map-marker-alt"
-                                  size={20}
-                                  color="#6366F1"
-                                />
-                                <Text style={styles.detailTitle}>
-                                  Places to Visit
-                                </Text>
-                              </View>
-                              {day.places.map((place) => (
-                                <View key={place.name} style={styles.placeItem}>
-                                  <Text style={styles.placeName}>
-                                    {place.name}
-                                  </Text>
-                                  <Text style={styles.detailText}>
-                                    {place.description}
-                                  </Text>
-                                  <Text style={styles.detailMeta}>
-                                    Time: {place.time}
-                                  </Text>
-                                  <Text style={styles.detailMeta}>
-                                    Cost: ${place.expense}
-                                  </Text>
-                                </View>
-                              ))}
-                            </View>
-                          )}
-                          {day.restaurant && day.restaurant.length > 0 && (
-                            <View style={styles.detailSection}>
-                              <View style={styles.detailTitleContainer}>
-                                <MaterialIcons
-                                  name="restaurant"
-                                  size={20}
-                                  color="#6366F1"
-                                />
-                                <Text style={styles.detailTitle}>Dining</Text>
-                              </View>
-                              {day.restaurant.map((rest) => (
-                                <View
-                                  key={rest.name}
-                                  style={styles.restaurantItem}
-                                >
-                                  <Text style={styles.restaurantName}>
-                                    {rest.name}
-                                  </Text>
-                                  <Text style={styles.mealType}>
-                                    {rest.mealType}
-                                  </Text>
-                                  <Text style={styles.detailText}>
-                                    {rest.description}
-                                  </Text>
-                                  <Text style={styles.detailMeta}>
-                                    Cost: ${rest.cost}
-                                  </Text>
-                                </View>
-                              ))}
-                            </View>
-                          )}
-                          {day.activities && day.activities.length > 0 && (
-                            <View style={styles.detailSection}>
-                              <View style={styles.detailTitleContainer}>
-                                <MaterialCommunityIcons
-                                  name="hiking"
-                                  size={20}
-                                  color="#6366F1"
-                                />
-                                <Text style={styles.detailTitle}>
-                                  Activities
-                                </Text>
-                              </View>
-                              {day.activities.map((activity) => (
-                                <View
-                                  key={activity._id}
-                                  style={styles.activityItem}
-                                >
-                                  <Text style={styles.activityName}>
-                                    {activity.activityName}
-                                  </Text>
-                                  <Text style={styles.detailText}>
-                                    {activity.description}
-                                  </Text>
-                                  <Text style={styles.detailMeta}>
-                                    Cost: ${activity.cost}
-                                  </Text>
-                                </View>
-                              ))}
-                            </View>
-                          )}
-                        </Animated.View>
-                      )}
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
+              </TouchableOpacity>
             </View>
           )}
 
@@ -940,7 +803,97 @@ const styles = StyleSheet.create({
   metadataItem: { 
     alignItems: "center" 
   },
-  itinerary: {},
+  // Trip Card Container
+  tripCardContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,  // Android shadow
+  },
+
+  // Trip Card Header
+  tripCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+
+  tripCardTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+
+  // View Details Button
+  viewDetailsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  viewDetailsText: {
+    color: '#6366F1',
+    fontSize: 14,
+    fontWeight: '600',
+    marginRight: 4,  // Space between text and icon
+  },
+
+  // Trip Card Content
+  tripCardContent: {
+    paddingTop: 8,
+  },
+
+  // Metadata Section
+  metadata: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    marginBottom: 12,
+  },
+
+  metadataItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 8,
+    flex: 1,
+  },
+
+  metadataText: {
+    fontSize: 14,
+    color: '#555',
+    marginLeft: 8,
+  },
+
+  // Itinerary Preview
+  itineraryPreview: {
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: '#E8F0FE',
+    borderRadius: 8,
+  },
+
+  itineraryPreviewTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+
+  itineraryPreviewText: {
+    fontSize: 14,
+    color: '#555',
+    marginTop: 4,
+  },
+
+  itineraryPreviewSubtext: {
+    fontSize: 12,
+    color: '#777',
+    marginTop: 4,
+  },
   dayCard: {
     backgroundColor: "#fff", // White background for a clean card look
     borderRadius: 8,

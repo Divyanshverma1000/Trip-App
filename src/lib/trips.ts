@@ -215,6 +215,24 @@ export const leaveTrip = async (tripId: string): Promise<void> => {
   }
 };
 
+export const changeMemberRole = async (tripId: string, memberId: string, newRole: 'viewer' | 'editor'): Promise<Trip> => {
+  try {
+    const response = await axios.post(`/trips/${tripId}/change-role`, { memberId, newRole });
+    Toast.show({
+      type: 'success',
+      text1: `Member role updated to ${newRole}`,
+    });
+    return response.data.trip;
+  } catch (error: any) {
+    const errorMessage = error.response?.data?.message || 'Failed to change member role';
+    Toast.show({
+      type: 'error',
+      text1: errorMessage,
+    });
+    throw error;
+  }
+};
+
 export const getTrendingTrips = async (): Promise<Trip[]> => {
   try {
     const response = await axios.get<{ trips: Trip[] }>('/trips/trending');

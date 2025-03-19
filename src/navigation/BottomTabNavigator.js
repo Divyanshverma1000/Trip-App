@@ -10,7 +10,7 @@ import FeedScreen from '../screens/FeedScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import GroupChatScreen from '../screens/GroupChatScreen';
 import CreateBlogNavigator from '../navigation/CreateBlogNavigator';
-
+import MyBlogsScreen from '../screens/MyBlogsScreen';
 
 const { width } = Dimensions.get('window');
 const Tab = createBottomTabNavigator();
@@ -80,13 +80,12 @@ const BottomTabNavigator = () => {
           }}
         />
         <Tab.Screen
-          name="GroupChat"
-          // component={GroupChatScreen}
-          component={CreateBlogNavigator}
+          name="MyBlogs"
+          component={MyBlogsScreen}
           options={{
             tabBarIcon: ({ focused }) => (
               <MaterialIcons
-                name="chat"
+                name="article"
                 size={24}
                 color={focused ? COLORS.primary : COLORS.inactive}
               />
