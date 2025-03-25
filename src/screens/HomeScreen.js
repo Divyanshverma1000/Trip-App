@@ -83,7 +83,7 @@ const HomeScreen = () => {
 
   const handleTripPress = (tripId) => {
     console.log("Trip pressed with ID:", tripId);
-    navigation.navigate("TripDetails", { tripId });
+    navigation.navigate("TripDetailsScreen", { tripId });
   };
 
   return (
@@ -109,7 +109,7 @@ const HomeScreen = () => {
         </View>
 
         {/* Search Bar */}
-        <View style={styles.searchRow}>
+        {/* <View style={styles.searchRow}>
           <View style={styles.searchContainer}>
             <SearchBar
               placeholder="Search destinations..."
@@ -117,7 +117,7 @@ const HomeScreen = () => {
               onChangeText={setSearchQuery}
             />
           </View>
-        </View>
+        </View> */}
       </View>
 
       <ScrollView

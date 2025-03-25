@@ -21,6 +21,7 @@ import TripCard from '../components/TripCard';
 import { Feather } from '@expo/vector-icons';
 import DeleteTripModal from '../components/DeleteTripModal';
 import { deleteTrip } from '../lib/trips';
+import { getBlogPosts } from '../lib/blogs';
 import * as ImagePicker from 'expo-image-picker';
 import { updateProfilePhoto, getProfile } from '../lib/user';
 import Toast from 'react-native-toast-message';
@@ -37,10 +38,12 @@ const ProfileScreen = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [userBlogs, setUserBlogs] = useState([]);
 
   useEffect(() => {
     if (user?.id) {
       fetchMyTrips();
+      fetchUserBlogs();
     }
   }, [user, fetchMyTrips]);
 
@@ -57,6 +60,18 @@ const ProfileScreen = () => {
     } finally {
       setDeleteLoading(false);
       setTripToDelete(null);
+    }
+  };
+
+  const fetchUserBlogs = async () => {
+    try {
+      const blogs = await getBlogPosts();
+      const myBlogs = blogs.filter(
+        (blog) => blog.host && blog.host._id === user.id
+      );
+      setUserBlogs(myBlogs);
+    } catch (error) {
+      console.error("Error fetching user blogs:", error);
     }
   };
 
@@ -147,13 +162,29 @@ const ProfileScreen = () => {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      // Fetch updated user profile data and trips simultaneously
-      const [updatedProfile] = await Promise.all([
-        getProfile(),
-        fetchMyTrips()
-      ]);
+      // ## the error was due to this part where we are fetching the updated profile and trips simultaneously
+      // ## $$ THIS IS THE CODE THAT CAUSED THE ERROR $$ "USER NOT AUTHENTICATED" $$ERROR$$
+      // // Fetch updated user profile data and trips simultaneously
+      // const [updatedProfile] = await Promise.all([
+      //   getProfile(),
+      //   fetchMyTrips()
+      // ]);
+
+      // ## so here we are doing it one by one
+      // ## first get the updated profile
+      // ## then update the user state (The user state is updated with the new profile data)
+      // ## then fetch the trips (The trips are fetched with the updated user data)
+
+      // First get the updated profile
+      // const updatedProfile = await getProfile();
       
-      updateUser(updatedProfile);
+      // // Update user state first
+      // await updateUser(updatedProfile);
+      
+      // Then fetch trips with the updated user data
+      await fetchMyTrips();
+      await fetchUserBlogs();
+      
       Toast.show({
         type: 'success',
         text1: 'Profile and trips updated',
@@ -244,12 +275,12 @@ const ProfileScreen = () => {
         {/* Stats Section */}
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{user?.trips?.length || 0}</Text>
+            <Text style={styles.statNumber}>{myTrips.length || 0}</Text>
             <Text style={styles.statLabel}>Trips</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{user?.blogs?.length || 0}</Text>
+            <Text style={styles.statNumber}>{userBlogs?.length || 0}</Text>
             <Text style={styles.statLabel}>Blogs</Text>
           </View>
           <View style={styles.statDivider} />
@@ -317,6 +348,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: 100,
   },
   header: {
     flexDirection: 'row',

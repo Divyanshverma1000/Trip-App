@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import Animated, { useSharedValue, FadeInUp } from 'react-native-reanimated';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { getTrip, joinTrip as joinTripApi, deleteTrip, leaveTrip } from '../lib/trips';
+import { getTrip, joinTrip as joinTripApi, deleteTrip, leaveTrip, changeMemberRole } from '../lib/trips';
 import { TripHeader } from '../components/TripHeader';
 import { TripTag } from '../components/TripTag';
 import { MaterialIcons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
@@ -139,6 +139,33 @@ const TripDetailsScreen = () => {
               navigation.navigate('Home');
             } catch (error) {
               console.error('Failed to leave trip:', error);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const handleChangeMemberRole = async (memberId, currentRole) => {
+    const newRole = currentRole === 'editor' ? 'viewer' : 'editor';
+    
+    Alert.alert(
+      'Change Member Role',
+      `Change this member's role to ${newRole}?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Change',
+          onPress: async () => {
+            try {
+              const updatedTrip = await changeMemberRole(trip._id, memberId, newRole);
+              setTrip(updatedTrip);
+            } catch (error) {
+              console.error('Failed to change member role:', error);
             }
           },
         },
@@ -522,14 +549,29 @@ const TripDetailsScreen = () => {
                           <Text style={styles.hostBadge}> (Host)</Text>
                         )}
                       </Text>
-                      <Text style={[
-                        styles.memberStatus,
-                        member.status === 'accepted' && styles.acceptedStatus,
-                        member.status === 'pending' && styles.pendingStatus
-                      ]}>
-                        {member.status}
-                      </Text>
+                      <View style={styles.memberStatusRow}>
+                        <Text style={[
+                          styles.memberStatus,
+                          member.status === 'accepted' && styles.acceptedStatus,
+                          member.status === 'pending' && styles.pendingStatus
+                        ]}>
+                          {member.status}
+                        </Text>
+                        {member.status === 'accepted' && member.role !== 'host' && (
+                          <Text style={styles.memberRole}>
+                            • {member.role || 'viewer'}
+                          </Text>
+                        )}
+                      </View>
                     </View>
+                    {isHost && member.user._id !== trip.host._id && member.status === 'accepted' && (
+                      <TouchableOpacity
+                        style={styles.roleEditButton}
+                        onPress={() => handleChangeMemberRole(member.user._id, member.role || 'viewer')}
+                      >
+                        <Feather name="edit-2" size={16} color="#6366F1" />
+                      </TouchableOpacity>
+                    )}
                   </View>
                 ))}
               </View>
@@ -954,6 +996,24 @@ const styles = StyleSheet.create({
   },
   membersContainer: {
     marginTop: 8
+  },
+  memberStatusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  memberRole: {
+    fontSize: 14,
+    marginLeft: 6,
+    color: '#6b7280', // gray-500
+  },
+  roleEditButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#e0e7ff', // indigo-100
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 'auto',
   },
   memberItem: {
     flexDirection: 'row',

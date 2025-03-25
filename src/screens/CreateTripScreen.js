@@ -14,7 +14,9 @@ import { createTrip } from '../lib/trips';
 import Toast from 'react-native-toast-message';
 import * as ImagePicker from 'expo-image-picker';
 
-const CreateTripScreen = ({ navigation }) => {
+const CreateTripScreen = ({ navigation, route }) => {
+  const { fromBlogCreation, onTripCreated } = route.params || {};
+
   const [tripData, setTripData] = useState({
     title: '',
     description: '',
@@ -154,12 +156,22 @@ const CreateTripScreen = ({ navigation }) => {
     try {
       setLoading(true);
       const createdTrip = await createTrip(formData);
+      
       Toast.show({
         type: 'success',
-        text1: 'Basic trip details saved!'
+        text1: 'Trip created successfully!'
       });
-      // navigation.navigate('ItineraryPlanning', { tripId: createdTrip._id });
-      navigation.navigate('Profile');
+
+      // Check if we came from blog creation
+      if (fromBlogCreation && onTripCreated) {
+        // Navigate back to blog creation with the new trip
+        onTripCreated(createdTrip);
+        navigation.goBack();
+      } else {
+        // Normal flow - go to Profile
+        navigation.navigate('Profile');
+      }
+
     } catch (error) {
       console.error('Failed to create trip:', error);
       Toast.show({

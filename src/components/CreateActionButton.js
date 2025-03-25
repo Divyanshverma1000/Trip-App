@@ -200,17 +200,16 @@ const styles = StyleSheet.create({
   actionButtonInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    borderRadius: 25,
-    elevation: 5,
+    width: 130,
+    height:80,  
+    paddingHorizontal: 30, 
+    borderRadius: 60,      
+    elevation: 6,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    gap: 8,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    gap: 10,
   },
   tripButton: {
     backgroundColor: COLORS.secondary,
@@ -220,7 +219,7 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     color: COLORS.white,
-    fontSize: 14,
+    fontSize: 21,
     fontWeight: '600',
   },
 });

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
+  TextInput,
   FlatList,
   StyleSheet,
   ActivityIndicator,
@@ -55,14 +56,14 @@ const formatDate = (dateString) => {
   if (diffDays < 7) {
     const daysRounded = Math.floor(diffDays);
     return daysRounded <= 0
-      ? "Today"
-      : `${daysRounded} day${daysRounded > 1 ? "s" : ""} ago`;
+      ? <Text>Today</Text>
+      : <Text>{`${daysRounded} day${daysRounded > 1 ? "s" : ""} ago`}</Text>;
   }
-  return date.toLocaleDateString("en-US", {
+  return <Text>{date.toLocaleDateString("en-US", {
     month: "short",
-    day: "numeric",
+    day: "numeric", 
     year: "numeric",
-  });
+  })}</Text>;
 };
 
 const FeedScreen = () => {
@@ -194,13 +195,24 @@ const FeedScreen = () => {
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
+  <TextInput
+    style={styles.textInput}
+    value={searchQuery}
+    onChangeText={setSearchQuery}
+    onSubmitEditing={handleSearch}
+    returnKeyType="search"
+    placeholder="Search trips and experiences..."
+  />
+</View>
+
+      {/* <View style={styles.searchContainer}>
         <SearchBar
           value={searchQuery}
           onChangeText={setSearchQuery}
           onSubmitEditing={handleSearch}
           placeholder="Search trips and experiences..."
         />
-      </View>
+      </View> */}
 
       {/* Tags Section */}
       <View style={styles.tagsSection}>
@@ -284,6 +296,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 10,
+    fontSize: 16,
+    backgroundColor: '#fff',
   },
   listContainer: {
     padding: 16,
