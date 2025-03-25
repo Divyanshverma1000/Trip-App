@@ -19,7 +19,7 @@ import SearchBar from "../components/SearchBar";
 import TripCard from "../components/TripCard";
 import BlogCard from "../components/BlogCard";
 import { getOpenTrips } from "../lib/trips";
-import { getBlogPosts, searchBlogs } from "../lib/blogs";
+import { getBlogPosts, getTrendingBlogs, searchBlogs, trendingBlogs } from "../lib/blogs";
 import { AuthContext } from "../navigation/AppNavigator";
 import { useNavigation } from "@react-navigation/native";
 
@@ -32,6 +32,7 @@ const HomeScreen = () => {
   const { user } = useContext(AuthContext);
   const [blogs, setBlogs] = useState([]);
   const [openTrips, setOpenTrips] = useState([]);
+  const [trendingBlogs, setTrendingBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,12 +43,14 @@ const HomeScreen = () => {
 
   const fetchData = async () => {
     try {
-      const [blogsData, tripsData] = await Promise.all([
+      const [blogsData, tripsData, trendingData] = await Promise.all([
         getBlogPosts(),
         getOpenTrips(),
+        getTrendingBlogs()
       ]);
       setBlogs(blogsData);
       setOpenTrips(tripsData);
+      setTrendingBlogs(trendingData);
     } catch (err) {
       console.error("Error fetching data:", err);
     } finally {
@@ -70,16 +73,7 @@ const HomeScreen = () => {
     fetchRegularBlogs();
   }, []);
 
-  const trendingBlogs = blogs
-    .filter((blog) => blog.ratings && blog.ratings.length > 0)
-    .map((blog) => {
-      const avgRating =
-        blog.ratings.reduce((sum, rating) => sum + rating.value, 0) /
-        blog.ratings.length;
-      return { ...blog, averageRating: avgRating };
-    })
-    .sort((a, b) => b.averageRating - a.averageRating)
-    .slice(0, 5);
+  const trendingBlogs5 = trendingBlogs.slice(0, 5);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -154,7 +148,7 @@ const HomeScreen = () => {
                 style={styles.loader}
               />
             ) : (
-              trendingBlogs.map((blog) => (
+              trendingBlogs5.map((blog) => (
                 <BlogCard
                   key={blog._id}
                   blog={blog}
