@@ -5,13 +5,15 @@ import {
   ActivityIndicator,
   StyleSheet,
   Image,
+  Platform,
   ScrollView,
   TouchableOpacity,
+  RefreshControl,
   Alert,
   TextInput,
   Modal,
 } from "react-native";
-import Animated, { useSharedValue, FadeInUp } from "react-native-reanimated";
+import Animated, { useSharedValue, FadeInUp ,useAnimatedScrollHandler} from "react-native-reanimated";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import {
@@ -28,6 +30,7 @@ import {
   FontAwesome5,
   Ionicons,
 } from "@expo/vector-icons";
+import { TripHeader } from '../components/TripHeader';
 import { AuthContext } from "../navigation/AppNavigator";
 
 
@@ -40,6 +43,12 @@ const BlogDetailsScreen = () => {
   const [loading, setLoading] = useState(true);
   const [expandedDay, setExpandedDay] = useState(null);
   const scrollY = useSharedValue(0);
+  
+  const onScroll = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
   const [ratingSubmitting, setRatingSubmitting] = useState(false);
 
   // Q&A state
@@ -53,6 +62,23 @@ const BlogDetailsScreen = () => {
 
   // Local state for current user's rating (optimistic update)
   const [userRating, setUserRating] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  
+  const fetchBlogData = async () => {
+    if (!blogId) return;
+    try {
+      setLoading(true); // Start refresh animation
+      const data = await getBlogPostById(blogId); // Fetch latest blog data
+      setBlog(data); // Update state with new blog data
+      await fetchQuestions(); // Refresh questions as well
+    } catch (error) {
+      console.error('Failed to refresh blog:', error);
+      Alert.alert('Error', 'Failed to refresh blog data');
+    } finally {
+      setLoading(false);
+      setRefreshing(false); // Stop refresh animation
+    }
+  };
 
   useEffect(() => {
     if (blogId) {
@@ -247,7 +273,8 @@ const BlogDetailsScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* Header with Back Button */}
+{/*       
+     
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -257,16 +284,31 @@ const BlogDetailsScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Cover Image */}
-      <Image source={{ uri: blog.coverPhoto }} style={styles.coverImage} />
+
+      <Image source={{ uri: blog.coverPhoto }} style={styles.coverImage} /> 
+    */}
+
+      <TripHeader coverPhoto={blog.coverPhoto} title={blog.title} scrollY={scrollY} />
 
       <Animated.ScrollView
-        style={styles.scrollView}
-        onScroll={(event) => {
-          scrollY.value = event.nativeEvent.contentOffset.y;
-        }}
-        scrollEventThrottle={16}
-      >
+  style={styles.scrollView}
+  onScroll={onScroll}
+  scrollEventThrottle={16}
+  contentInset={{ top: Platform.OS === 'ios' ? 10 : 0 }} // Adds space at the top on iOS
+  contentOffset={{ y: Platform.OS === 'ios' ? -10 : 0 }} // Starts scrolled down slightly on iOS
+  refreshControl={
+    <RefreshControl 
+      refreshing={refreshing} 
+      onRefresh={fetchBlogData}
+      colors={["#6366F1"]} // For Android
+      tintColor="#6366F1" // For iOS
+      title="Refreshing..." // iOS only
+      titleColor="#6366F1" // iOS only
+      progressBackgroundColor="#ffffff" // Makes the circle more visible
+      progressViewOffset={Platform.OS === 'android' ? 80 : 0} // Better position for Android
+    />
+  }
+>
         <View style={styles.content}>
           {/* Title */}
           <View style={styles.sectionContainer}>

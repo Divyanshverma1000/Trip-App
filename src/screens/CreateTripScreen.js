@@ -272,7 +272,7 @@ const CreateTripScreen = ({ navigation, route }) => {
             keyboardType="numeric"
           />
         </View>
-{/* 
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Budget Information</Text>
           
@@ -285,15 +285,15 @@ const CreateTripScreen = ({ navigation, route }) => {
             keyboardType="numeric"
           />
 
-          <Text style={styles.label}>Actual Budget (if known)</Text>
+          {/* <Text style={styles.label}>Actual Budget (if known)</Text>
           <TextInput
             style={styles.input}
             value={tripData.actualBudget}
             onChangeText={(text) => setTripData(prev => ({ ...prev, actualBudget: text }))}
             placeholder="Enter actual budget (optional)"
             keyboardType="numeric"
-          />
-        </View> */}
+          /> */}
+        </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Packing Essentials</Text>

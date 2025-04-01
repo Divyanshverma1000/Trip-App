@@ -30,6 +30,7 @@ const TAGS = [
   { id: '18', name: 'StudyBreak', icon: 'school', iconLibrary: 'MaterialIcons' },
   { id: '19', name: 'ReligiousTrip', icon: 'temple-hindu', iconLibrary: 'MaterialIcons' },
   { id: '20', name: 'WildlifeSafari', icon: 'paw', iconLibrary: 'MaterialCommunityIcons' },
+  { id: '21', name: 'WeekendTrip', icon: 'calendar-weekend', iconLibrary: 'MaterialCommunityIcons' },
 ];
 
 // Helper function to render icon based on iconLibrary

@@ -4,7 +4,7 @@
     "slug": "wander",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/TheWanderProject_2048.png",
+    "icon": "./assets/images/WanderLogo_IITROPAR.jpg",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/TheWanderProject-nobg_2048.png",
+        "foregroundImage": "./assets/images/WanderLogo_IITROPAR.jpg",
         "backgroundColor": "#ffffff"
       },
       "package": "com.anonymous.wander"
