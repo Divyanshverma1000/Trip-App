@@ -49,6 +49,7 @@ export interface BlogPost {
   budget?: number;
   concerns?: Concerns;
   ratings: Rating[];
+  view: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -125,6 +126,19 @@ export const createBlogPost = async (formData: FormData): Promise<BlogPost> => {
 export const getBlogPosts = async (): Promise<BlogPost[]> => {
   try {
     const response = await axios.get<BlogPost[]>('/blogs');
+    return response.data;
+  } catch (error: any) {
+    Toast.show({
+      type: 'error',
+      text1: 'Failed to fetch blog posts'
+    });
+    throw error;
+  }
+};
+
+export const getTrendingBlogs = async (): Promise<BlogPost[]> => {
+  try {
+    const response = await axios.get<BlogPost[]>('/blogs/trendings');
     return response.data;
   } catch (error: any) {
     Toast.show({

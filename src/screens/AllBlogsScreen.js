@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import BlogCard from "../components/BlogCard";
-import { getBlogPosts } from "../lib/blogs";
+import { getTrendingBlogs } from "../lib/blogs";
 import { useNavigation } from "@react-navigation/native";
 
 const AllBlogsScreen = () => {
@@ -22,7 +22,7 @@ const AllBlogsScreen = () => {
   const fetchBlogs = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await getBlogPosts();
+      const data = await getTrendingBlogs();
       setBlogs(data);
     } catch (error) {
       console.error("Error fetching blogs:", error);
@@ -80,7 +80,7 @@ const AllBlogsScreen = () => {
         <ActivityIndicator style={styles.loader} size="large" color="#4CAF50" />
       ) : (
         <FlatList
-          data={trendingBlogs}
+          data={blogs}
           renderItem={renderBlogCard}
           keyExtractor={(item) => item._id}
           contentContainerStyle={styles.listContainer}
