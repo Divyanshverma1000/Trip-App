@@ -577,7 +577,9 @@ const onScroll = useAnimatedScrollHandler({
                 {' Trip Members'}
               </Text>
               <View style={styles.membersContainer}>
-                {trip.members.map((member) => (
+                {trip.members
+                .filter(member => member.status !== 'pending')
+                .map((member) => (
                   <View 
                     key={member.user._id} 
                     style={[
