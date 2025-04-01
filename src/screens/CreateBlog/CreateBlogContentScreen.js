@@ -10,7 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 
 const CreateBlogContentScreen = ({ navigation }) => {
   const [blogData, setBlogData] = useState({
@@ -19,12 +19,6 @@ const CreateBlogContentScreen = ({ navigation }) => {
     description: '',
     recommendations: '',
     advisory: '',
-    // concerns: {
-    //   womenSafety: 0,
-    //   affordability: 0,
-    //   culturalExperience: 0,
-    //   accessibility: 0,
-    // },
   });
 
   const [errors, setErrors] = useState({});
@@ -50,19 +44,12 @@ const CreateBlogContentScreen = ({ navigation }) => {
     }
   };
 
-  const handleRating = (field, value) => {
-    setBlogData(prev => ({
-      ...prev,
-      concerns: {
-        ...prev.concerns,
-        [field]: value,
-      },
-    }));
-  };
-
   const renderInput = (field, label, placeholder, multiline = false) => (
     <View style={styles.inputContainer}>
-      <Text style={styles.label}>{label}</Text>
+      <View style={styles.inputLabel}>
+        <Ionicons name="information-circle-outline" size={20} color="#666" style={styles.labelIcon} />
+        <Text style={styles.label}>{label}</Text>
+      </View>
       <TextInput
         style={[
           styles.input,
@@ -72,38 +59,13 @@ const CreateBlogContentScreen = ({ navigation }) => {
         value={blogData[field]}
         onChangeText={(text) => setBlogData(prev => ({ ...prev, [field]: text }))}
         placeholder={placeholder}
+        placeholderTextColor="#999"
         multiline={multiline}
         numberOfLines={multiline ? 4 : 1}
       />
       {errors[field] && (
         <Text style={styles.errorText}>{errors[field]}</Text>
       )}
-    </View>
-  );
-
-  const StarRating = ({ rating, onPress }) => {
-    return (
-      <View style={styles.starRatingContainer}>
-        {[1, 2, 3, 4, 5].map((star) => (
-          <TouchableOpacity key={star} onPress={() => onPress(star)}>
-            <MaterialIcons
-              name={star <= rating ? 'star' : 'star-border'}
-              size={32}
-              color="#FFD700"
-            />
-          </TouchableOpacity>
-        ))}
-      </View>
-    );
-  };
-
-  const renderRatingInput = (field, label) => (
-    <View style={styles.ratingInputContainer}>
-      <Text style={styles.ratingLabel}>{label}</Text>
-      <StarRating
-        rating={blogData.concerns[field]}
-        onPress={(value) => handleRating(field, value)}
-      />
     </View>
   );
 
@@ -115,26 +77,33 @@ const CreateBlogContentScreen = ({ navigation }) => {
       >
         <ScrollView 
           style={styles.scrollView} 
-          contentContainerStyle={styles.scrollContent} // Added content container style
+          contentContainerStyle={styles.scrollContent}
         >
-          <View style={styles.header}>
+          <View style={styles.headerContainer}>
             <Text style={styles.headerTitle}>Create Blog Post</Text>
             <Text style={styles.headerSubtitle}>Step 1: Basic Information</Text>
           </View>
 
-          {renderInput('title', 'Title', 'Enter your blog title')}
-          {renderInput('summary', 'Summary', 'Brief summary of your blog', true)}
-          {renderInput('description', 'Description', 'Detailed description of your experience', true)}
-          {renderInput('recommendations', 'Recommendations (Optional)', 'Any recommendations for future travelers', true)}
-          {renderInput('advisory', 'Travel Advisory (Optional)', 'Important information or warnings', true)}
-
-          <View style={styles.sectionDivider} />
-
-          {/* <Text style={styles.sectionTitle}>Rate Your Concerns</Text>
-          {renderRatingInput('womenSafety', 'Women Safety')}
-          {renderRatingInput('affordability', 'Affordability')}
-          {renderRatingInput('culturalExperience', 'Cultural Experience')}
-          {renderRatingInput('accessibility', 'Accessibility')} */}
+          {renderInput('title', 'Title', 'Example: A Hidden Gem in the Himalayas')}
+          {renderInput('summary', 'Summary', 'Briefly describe your experience. Example: A peaceful getaway with breathtaking mountain views.', true)}
+          {renderInput(
+            'description',
+            'Description',
+            'Share your detailed experience. Mention places visited, activities, food, local culture, and memorable moments.',
+            true
+          )}
+          {renderInput(
+            'recommendations',
+            'Recommendations (Optional)',
+            'Tips for future travelers: Best time to visit, must-see spots, and local cuisine suggestions.',
+            true
+          )}
+          {renderInput(
+            'advisory',
+            'Travel Advisory (Optional)',
+            'Share any important warnings: Weather issues, safety tips, or local regulations.',
+            true
+          )}
         </ScrollView>
 
         <View style={styles.footer}>
@@ -151,37 +120,61 @@ const CreateBlogContentScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F2F2F2',
   },
   scrollView: {
     flex: 1,
   },
-  // Add contentContainerStyle to ensure scrolling content is padded at the bottom
   scrollContent: {
     padding: 16,
-    paddingBottom: 100, // Extra bottom padding to avoid content being hidden
+    paddingBottom: 100,
   },
-  header: {
+  headerContainer: {
+    backgroundColor: '#4CAF50',
+    borderRadius: 10,
+    paddingVertical: 24,
+    paddingHorizontal: 16,
     marginBottom: 24,
+    alignItems: 'center',
+    elevation: 3, // Android shadow
+    shadowColor: '#000', // iOS shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#FFF',
   },
   headerSubtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#FFF',
     marginTop: 4,
   },
   inputContainer: {
     marginBottom: 20,
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    padding: 12,
+    elevation: 2, // Android shadow
+    shadowColor: '#000', // iOS shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  inputLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  labelIcon: {
+    marginRight: 4,
   },
   label: {
     fontSize: 16,
     fontWeight: '500',
     color: '#333',
-    marginBottom: 8,
   },
   input: {
     borderWidth: 1,
@@ -189,7 +182,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#FAFAFA',
+    color: '#333',
   },
   multilineInput: {
     height: 120,
@@ -203,37 +197,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
   },
-  sectionDivider: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    marginVertical: 24,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
-  },
-  ratingInputContainer: {
-    marginBottom: 20,
-  },
-  ratingLabel: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 8,
-  },
-  starRatingContainer: {
-    flexDirection: 'row',
-  },
   footer: {
     padding: 16,
     borderTopWidth: 1,
     borderTopColor: '#eee',
+    backgroundColor: '#FFF',
   },
   nextButton: {
     backgroundColor: '#4CAF50',
     borderRadius: 8,
-    padding: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

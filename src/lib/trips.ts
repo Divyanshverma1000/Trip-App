@@ -96,7 +96,7 @@ export const createTrip = async (formData: FormData): Promise<Trip> => {
   }
 };
 
-// --- Other functions remain unchanged ---
+
 
 export const getTrip = async (tripId: string): Promise<Trip> => {
   try {
@@ -194,6 +194,33 @@ export const respondToInvitation = async (tripId: string, action: 'accept' | 're
     Toast.show({
       type: 'error',
       text1: errorMessage
+    });
+    throw error;
+  }
+};
+
+export const respondToJoinTripRequest = async (
+  notificationId: string,
+  response: "accept" | "reject"
+): Promise<any> => {
+  try {
+    const res = await axios.post("/notifications/respond-to-request", {
+      notificationId,
+      response,
+    });
+    
+    Toast.show({
+      type: "success",
+      text1: response === "accept" ? "Request accepted" : "Request rejected",
+      text2: res.data.message,
+    });
+    
+    return res.data;
+  } catch (error: any) {
+    Toast.show({
+      type: "error",
+      text1: "Failed to respond to request",
+      text2: error.response?.data?.message || error.message,
     });
     throw error;
   }
@@ -302,10 +329,17 @@ export const getMyTrips = async (userId: string): Promise<Trip[]> => {
 export const joinTrip = async (tripId: string): Promise<{ message: string; trip?: any }> => {
   try {
     const response = await axios.post(`/trips/${tripId}/join`);
-    Toast.show({
-      type: 'success',
-      text1: 'Successfully joined the trip',
-    });
+    if (response.status === 201) {
+      Toast.show({
+        type: "success",
+        text1: "Join request sent successfully",
+      });
+    } else if (response.status === 200) {
+      Toast.show({
+        type: "info",
+        text1: "You have already requested to join this trip",
+      });
+    }    
     return response.data;
   } catch (error: any) {
     Toast.show({

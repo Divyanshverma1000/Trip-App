@@ -7,30 +7,42 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from 'react-native';
-import { MaterialIcons, Feather } from '@expo/vector-icons';
+import { MaterialIcons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 
 const TAGS = [
-  { id: '1', name: 'SummerTrip', icon: 'sun' },
-  { id: '2', name: 'SafeForWomen', icon: 'shield' },
-  { id: '3', name: 'BudgetTravel', icon: 'dollar-sign' },
-  { id: '4', name: 'Adventure', icon: 'compass' },
-  { id: '5', name: 'CulturalExperience', icon: 'globe' },
-  { id: '6', name: 'FamilyFriendly', icon: 'users' },
-  { id: '7', name: 'SoloTravel', icon: 'user' },
-  { id: '8', name: 'CityBreak', icon: 'home' },
-  { id: '9', name: 'NatureEscape', icon: 'map-pin' },
-  { id: '10', name: 'BeachVacation', icon: 'umbrella' },
-  { id: '11', name: 'HistoricalSites', icon: 'book' },
-  { id: '12', name: 'FoodieJourney', icon: 'coffee' },
-  { id: '13', name: 'LuxuryTravel', icon: 'star' },
-  { id: '14', name: 'RoadTrip', icon: 'map' },
-  { id: '15', name: 'EcoTourism', icon: 'droplet' },
-  { id: '16', name: 'Nightlife', icon: 'moon' },
-  { id: '17', name: 'OffTheBeatenPath', icon: 'compass' },
-  { id: '18', name: 'WinterGetaway', icon: 'cloud-snow' },
-  { id: '19', name: 'Backpacking', icon: 'briefcase' },
-  { id: '20', name: 'WellnessRetreat', icon: 'heart' },
+  { id: '1', name: 'RoadTrip', icon: 'directions-car', iconLibrary: 'MaterialIcons' },
+  { id: '2', name: 'Trekking', icon: 'hiking', iconLibrary: 'MaterialCommunityIcons' },
+  { id: '3', name: 'Rafting', icon: 'kayaking', iconLibrary: 'MaterialCommunityIcons' },
+  { id: '4', name: 'Paragliding', icon: 'paragliding', iconLibrary: 'MaterialCommunityIcons' },
+  { id: '5', name: 'RiverCruise', icon: 'ferry', iconLibrary: 'MaterialCommunityIcons' },
+  { id: '6', name: 'ForestCamping', icon: 'campfire', iconLibrary: 'MaterialCommunityIcons' },
+  { id: '7', name: 'ShoppingSpree', icon: 'shopping-cart', iconLibrary: 'MaterialIcons' },
+  { id: '8', name: 'BeachTrip', icon: 'umbrella-beach', iconLibrary: 'MaterialCommunityIcons' },
+  { id: '9', name: 'PartyNight', icon: 'record-player', iconLibrary: 'MaterialCommunityIcons' },
+  { id: '10', name: 'FoodTrail', icon: 'silverware-fork-knife', iconLibrary: 'MaterialCommunityIcons' },
+  { id: '11', name: 'HeritageWalk', icon: 'city-variant', iconLibrary: 'MaterialCommunityIcons' },
+  { id: '12', name: 'CityTour', icon: 'location-city', iconLibrary: 'MaterialIcons' },
+  { id: '13', name: 'WaterfallVisit', icon: 'waterfall', iconLibrary: 'MaterialCommunityIcons' },
+  { id: '14', name: 'AdventureSports', icon: 'run-fast', iconLibrary: 'MaterialCommunityIcons' },
+  { id: '15', name: 'Backpacking', icon: 'bag-personal', iconLibrary: 'MaterialCommunityIcons' },
+  { id: '16', name: 'Camping', icon: 'tent', iconLibrary: 'MaterialCommunityIcons' },
+  { id: '17', name: 'NatureTrail', icon: 'tree', iconLibrary: 'MaterialCommunityIcons' },
+  { id: '18', name: 'StudyBreak', icon: 'school', iconLibrary: 'MaterialIcons' },
+  { id: '19', name: 'ReligiousTrip', icon: 'temple-hindu', iconLibrary: 'MaterialIcons' },
+  { id: '20', name: 'WildlifeSafari', icon: 'paw', iconLibrary: 'MaterialCommunityIcons' },
 ];
+
+// Helper function to render icon based on iconLibrary
+const renderIcon = (tag, color) => {
+  if (tag.iconLibrary === 'MaterialIcons') {
+    return <MaterialIcons name={tag.icon} size={20} color={color} />;
+  } else if (tag.iconLibrary === 'MaterialCommunityIcons') {
+    return <MaterialCommunityIcons name={tag.icon} size={20} color={color} />;
+  } else if (tag.iconLibrary === 'Feather') {
+    return <Feather name={tag.icon} size={20} color={color} />;
+  }
+  return null;
+};
 
 const CreateBlogTagsScreen = ({ route, navigation }) => {
   const { blogData } = route.params;
@@ -71,11 +83,7 @@ const CreateBlogTagsScreen = ({ route, navigation }) => {
               ]}
               onPress={() => handleTagPress(tag.name)}
             >
-              <Feather
-                name={tag.icon}
-                size={20}
-                color={selectedTags.includes(tag.name) ? '#FFF' : '#666'}
-              />
+              {renderIcon(tag, selectedTags.includes(tag.name) ? '#FFF' : '#666')}
               <Text
                 style={[
                   styles.tagText,
@@ -139,7 +147,6 @@ const styles = StyleSheet.create({
     padding: 16,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
   },
   tagButton: {
     flexDirection: 'row',
@@ -148,7 +155,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 25,
-    gap: 8,
+    margin: 6,
   },
   tagButtonSelected: {
     backgroundColor: '#4CAF50',
@@ -156,6 +163,7 @@ const styles = StyleSheet.create({
   tagText: {
     fontSize: 14,
     color: '#666',
+    marginLeft: 8,
   },
   tagTextSelected: {
     color: '#FFF',
@@ -165,7 +173,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderTopWidth: 1,
     borderTopColor: '#eee',
-    gap: 12,
+    justifyContent: 'space-between',
   },
   backButton: {
     padding: 12,
@@ -181,7 +189,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    marginLeft: 12,
   },
   nextButtonDisabled: {
     backgroundColor: '#ccc',
@@ -190,7 +198,8 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 18,
     fontWeight: '600',
+    marginRight: 8,
   },
 });
 
-export default CreateBlogTagsScreen; 
+export default CreateBlogTagsScreen;

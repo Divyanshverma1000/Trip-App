@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
 import { createBlogPost } from '../../lib/blogs';
 import { AuthContext } from '../../navigation/AppNavigator';
 import { getMyTrips } from '../../lib/trips';
@@ -68,7 +69,15 @@ const CreateBlogTripScreen = ({ navigation, route }) => {
         [
           {
             text: 'OK',
-            onPress: () => navigation.navigate('Feed')
+            // onPress: () => navigation.navigate('Feed')
+            onPress: () => {
+              navigation.dispatch(
+                CommonActions.reset({
+                  index: 0,
+                  routes: [{ name: 'Main', params: { screen: 'Feed' } }]
+                })
+              );
+            }
           }
         ]
       );

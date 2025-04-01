@@ -7,12 +7,14 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
-  Image
+  Image,
+  Switch
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { createTrip } from '../lib/trips';
 import Toast from 'react-native-toast-message';
 import * as ImagePicker from 'expo-image-picker';
+import { CommonActions } from '@react-navigation/native';
 
 const CreateTripScreen = ({ navigation, route }) => {
   const { fromBlogCreation, onTripCreated } = route.params || {};
@@ -39,6 +41,10 @@ const CreateTripScreen = ({ navigation, route }) => {
   const [currentEssential, setCurrentEssential] = useState('');
   const [coverPhoto, setCoverPhoto] = useState(null);
   const [additionalPhotos, setAdditionalPhotos] = useState([]);
+
+  const togglePrivacy = () => {
+    setTripData(prev => ({ ...prev, isPublic: !prev.isPublic }));
+  };
 
   const handleAddTag = () => {
     if (currentTag.trim()) {
@@ -169,7 +175,13 @@ const CreateTripScreen = ({ navigation, route }) => {
         navigation.goBack();
       } else {
         // Normal flow - go to Profile
-        navigation.navigate('Profile');
+        // navigation.navigate('Profile');
+         navigation.dispatch(
+                        CommonActions.reset({
+                          index: 0,
+                          routes: [{ name: 'Main', params: { screen: 'Profile' } }]
+                        })
+                      );
       }
 
     } catch (error) {
@@ -191,6 +203,12 @@ const CreateTripScreen = ({ navigation, route }) => {
           <Feather name="arrow-left" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Create New Trip</Text>
+      </View>
+ 
+      {/* Privacy Toggle */}
+      <View style={styles.privacyToggleContainer}>
+        <Text style={styles.privacyLabel}>{tripData.isPublic ? 'Public Trip' : 'Private Trip'}</Text>
+        <Switch value={tripData.isPublic} onValueChange={togglePrivacy} />
       </View>
 
       <View style={styles.form}>
@@ -254,7 +272,7 @@ const CreateTripScreen = ({ navigation, route }) => {
             keyboardType="numeric"
           />
         </View>
-
+{/* 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Budget Information</Text>
           
@@ -275,7 +293,7 @@ const CreateTripScreen = ({ navigation, route }) => {
             placeholder="Enter actual budget (optional)"
             keyboardType="numeric"
           />
-        </View>
+        </View> */}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Packing Essentials</Text>
@@ -475,6 +493,19 @@ const styles = StyleSheet.create({
   tagText: {
     marginRight: 4,
     color: '#666',
+  },
+  privacyToggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 10,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 8,
+    marginVertical: 10,
+  },
+  privacyLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   nextButton: {
     backgroundColor: '#4CAF50',

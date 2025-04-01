@@ -283,15 +283,15 @@ const ProfileScreen = () => {
             <Text style={styles.statNumber}>{userBlogs?.length || 0}</Text>
             <Text style={styles.statLabel}>Blogs</Text>
           </View>
-          <View style={styles.statDivider} />
+          {/* <View style={styles.statDivider} />
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>{user?.friends?.length || 0}</Text>
             <Text style={styles.statLabel}>Friends</Text>
-          </View>
+          </View> */}
         </View>
 
         {/* Action Buttons */}
-        <View style={styles.actionButtons}>
+        {/* <View style={styles.actionButtons}>
           <TouchableOpacity style={styles.actionButton}>
             <Feather name="edit-2" size={20} color="#4CAF50" />
             <Text style={styles.actionButtonText}>Edit Profile</Text>
@@ -300,7 +300,7 @@ const ProfileScreen = () => {
             <Feather name="settings" size={20} color="#4CAF50" />
             <Text style={styles.actionButtonText}>Settings</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
 
         {/* Trips Section */}
         <View style={styles.tripsSection}>

@@ -79,17 +79,23 @@ export const searchUsers = async (query: string): Promise<User[]> => {
   }
 };
 
-export const getUnrespondedInvites = async (): Promise<any[]> => {
+export const getUnrespondedNotifications = async (): Promise<any[]> => {
   try {
     const response = await axios.get<any[]>('/notifications/unresponded');
     const data = response.data;
 
     const notifications = data.map((n) => ({
       _id: n._id,
+      type: n.type,
       text: n.message,
       timestamp: new Date(n.createdAt).toLocaleString(),
-      tripId: n.tripId,
-      tripName: `Trip (${n.tripId})`,
+      // For invitation notifications, tripId is populated, so extract coverPhoto and title
+      tripId: n.tripId?._id || null,
+      tripCoverPhoto: n.tripId?.coverPhoto || null,
+      tripName: n.tripId?.title || `Trip Invitation`,
+      // For join requests, requestMadeBy is populated with profile info
+      userProfileImage: n.requestMadeBy?.photo || null,
+      userName: n.requestMadeBy?.name || null,
       date: new Date(n.createdAt).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",

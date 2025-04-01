@@ -13,6 +13,7 @@ import { Feather } from '@expo/vector-icons';
 import { searchUsers as searchUsersApi } from '../lib/user';
 import { inviteToTrip } from '../lib/trips';
 import Toast from 'react-native-toast-message';
+import { CommonActions } from '@react-navigation/native';
 
 const InviteFriendsScreen = ({ navigation, route }) => {
   const { tripData } = route.params;
@@ -60,13 +61,31 @@ const InviteFriendsScreen = ({ navigation, route }) => {
         inviteToTrip(tripData._id, user._id)
       ));
       console.log('Invites sent successfully');
-      // Navigate back to trip details screen
-      navigation.navigate('TripDetailsScreen', { 
-        tripId: tripData._id,
-        refresh: true // Trigger refresh to show new members
-      });
-      console.log('Navigated to trip details screen');
-
+  
+    // Replace the form flow with TripDetailsScreen after submission
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 1, // Set the index for the second screen
+        routes: [
+          { 
+            name: "Main",  //  bottom tab navigator
+            state: {
+              routes: [
+                { name: "Profile" }  // Profile tab inside MainTabs{bottom Tab navigator }
+              ]
+            }
+          },
+          {
+            name: "TripDetailsScreen",
+            params: { tripId: tripData._id, refresh: true },
+          }
+        ],
+      })
+    );
+    
+    
+    console.log("Navigated to trip details screen and cleared form flow");
+  
     } catch (error) {
       Toast.show({
         type: 'error',
@@ -76,6 +95,7 @@ const InviteFriendsScreen = ({ navigation, route }) => {
       console.log('Failed to send invites', error);
     }
   };
+  
 
   const renderUser = ({ item }) => {
     const isSelected = selectedUsers.find(u => u._id === item._id);
