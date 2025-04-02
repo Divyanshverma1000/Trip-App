@@ -13,7 +13,11 @@ import {
   TextInput,
   Modal,
 } from "react-native";
-import Animated, { useSharedValue, FadeInUp ,useAnimatedScrollHandler} from "react-native-reanimated";
+import Animated, {
+  useSharedValue,
+  FadeInUp,
+  useAnimatedScrollHandler,
+} from "react-native-reanimated";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import {
@@ -30,9 +34,8 @@ import {
   FontAwesome5,
   Ionicons,
 } from "@expo/vector-icons";
-import { TripHeader } from '../components/TripHeader';
+import { TripHeader } from "../components/TripHeader";
 import { AuthContext } from "../navigation/AppNavigator";
-
 
 const BlogDetailsScreen = () => {
   const { user } = useContext(AuthContext);
@@ -43,7 +46,7 @@ const BlogDetailsScreen = () => {
   const [loading, setLoading] = useState(true);
   const [expandedDay, setExpandedDay] = useState(null);
   const scrollY = useSharedValue(0);
-  
+
   const onScroll = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollY.value = event.contentOffset.y;
@@ -63,7 +66,7 @@ const BlogDetailsScreen = () => {
   // Local state for current user's rating (optimistic update)
   const [userRating, setUserRating] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
-  
+
   const fetchBlogData = async () => {
     if (!blogId) return;
     try {
@@ -72,8 +75,8 @@ const BlogDetailsScreen = () => {
       setBlog(data); // Update state with new blog data
       await fetchQuestions(); // Refresh questions as well
     } catch (error) {
-      console.error('Failed to refresh blog:', error);
-      Alert.alert('Error', 'Failed to refresh blog data');
+      console.error("Failed to refresh blog:", error);
+      Alert.alert("Error", "Failed to refresh blog data");
     } finally {
       setLoading(false);
       setRefreshing(false); // Stop refresh animation
@@ -265,7 +268,6 @@ const BlogDetailsScreen = () => {
       </TouchableOpacity>
     </View>
   );
-  
 
   const displayedQuestions = showAllQuestions
     ? questions
@@ -273,7 +275,7 @@ const BlogDetailsScreen = () => {
 
   return (
     <View style={styles.container}>
-{/*       
+      {/*       
      
       <View style={styles.header}>
         <TouchableOpacity
@@ -288,27 +290,31 @@ const BlogDetailsScreen = () => {
       <Image source={{ uri: blog.coverPhoto }} style={styles.coverImage} /> 
     */}
 
-      <TripHeader coverPhoto={blog.coverPhoto} title={blog.title} scrollY={scrollY} />
+      <TripHeader
+        coverPhoto={blog.coverPhoto}
+        title={blog.title}
+        scrollY={scrollY}
+      />
 
       <Animated.ScrollView
-  style={styles.scrollView}
-  onScroll={onScroll}
-  scrollEventThrottle={16}
-  contentInset={{ top: Platform.OS === 'ios' ? 10 : 0 }} // Adds space at the top on iOS
-  contentOffset={{ y: Platform.OS === 'ios' ? -10 : 0 }} // Starts scrolled down slightly on iOS
-  refreshControl={
-    <RefreshControl 
-      refreshing={refreshing} 
-      onRefresh={fetchBlogData}
-      colors={["#6366F1"]} // For Android
-      tintColor="#6366F1" // For iOS
-      title="Refreshing..." // iOS only
-      titleColor="#6366F1" // iOS only
-      progressBackgroundColor="#ffffff" // Makes the circle more visible
-      progressViewOffset={Platform.OS === 'android' ? 80 : 0} // Better position for Android
-    />
-  }
->
+        style={styles.scrollView}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        contentInset={{ top: Platform.OS === "ios" ? 10 : 0 }} // Adds space at the top on iOS
+        contentOffset={{ y: Platform.OS === "ios" ? -10 : 0 }} // Starts scrolled down slightly on iOS
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={fetchBlogData}
+            colors={["#6366F1"]} // For Android
+            tintColor="#6366F1" // For iOS
+            title="Refreshing..." // iOS only
+            titleColor="#6366F1" // iOS only
+            progressBackgroundColor="#ffffff" // Makes the circle more visible
+            progressViewOffset={Platform.OS === "android" ? 80 : 0} // Better position for Android
+          />
+        }
+      >
         <View style={styles.content}>
           {/* Title */}
           <View style={styles.sectionContainer}>
@@ -371,9 +377,7 @@ const BlogDetailsScreen = () => {
             </View>
             {canRate && (
               <View style={styles.ratingSubmission}>
-                <Text style={styles.ratingSubmissionText}>
-                  Rate this post:
-                </Text>
+                <Text style={styles.ratingSubmissionText}>Rate this post:</Text>
                 <View style={styles.starSubmissionContainer}>
                   {[1, 2, 3, 4, 5].map((star) => (
                     <TouchableOpacity
@@ -620,39 +624,69 @@ const BlogDetailsScreen = () => {
           {blog.trip && (
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionHeader}>Trip Details</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.tripCardContainer}
-                onPress={() => navigation.navigate('TripDetailsScreen', { tripId: blog.trip._id })}
+                onPress={() =>
+                  navigation.navigate("TripDetailsScreen", {
+                    tripId: blog.trip._id,
+                  })
+                }
               >
                 <View style={styles.tripCardHeader}>
-                  <Text style={styles.tripCardTitle}>{blog.trip.title || "Trip Overview"}</Text>
+                  <Text style={styles.tripCardTitle}>
+                    {blog.trip.title || "Trip Overview"}
+                  </Text>
                   <View style={styles.viewDetailsButton}>
                     <Text style={styles.viewDetailsText}>View Full Trip</Text>
-                    <MaterialIcons name="arrow-forward" size={18} color="#6366F1" />
+                    <MaterialIcons
+                      name="arrow-forward"
+                      size={18}
+                      color="#6366F1"
+                    />
                   </View>
                 </View>
 
                 <View style={styles.tripCardContent}>
                   <View style={styles.metadata}>
                     <View style={styles.metadataItem}>
-                      <MaterialIcons name="location-on" size={24} color="#6366F1" />
-                      <Text style={styles.metadataText}>{blog.trip.metadata?.destination || "Unknown location"}</Text>
+                      <MaterialIcons
+                        name="location-on"
+                        size={24}
+                        color="#6366F1"
+                      />
+                      <Text style={styles.metadataText}>
+                        {blog.trip.metadata?.destination || "Unknown location"}
+                      </Text>
                     </View>
                     <View style={styles.metadataItem}>
                       <MaterialIcons name="timer" size={24} color="#6366F1" />
-                      <Text style={styles.metadataText}>{blog.trip.metadata?.duration || "?"} days</Text>
+                      <Text style={styles.metadataText}>
+                        {blog.trip.metadata?.duration || "?"} days
+                      </Text>
                     </View>
                     <View style={styles.metadataItem}>
-                      <MaterialIcons name="attach-money" size={24} color="#6366F1" />
-                      <Text style={styles.metadataText}>${blog.trip.metadata?.cost || blog.trip.estimatedBudget || "?"}</Text>
+                      <MaterialIcons
+                        name="attach-money"
+                        size={24}
+                        color="#6366F1"
+                      />
+                      <Text style={styles.metadataText}>
+                        $
+                        {blog.trip.metadata?.cost ||
+                          blog.trip.estimatedBudget ||
+                          "?"}
+                      </Text>
                     </View>
                   </View>
-                  
+
                   {blog.trip.itinerary && blog.trip.itinerary.length > 0 && (
                     <View style={styles.itineraryPreview}>
-                      <Text style={styles.itineraryPreviewTitle}>Itinerary Preview:</Text>
+                      <Text style={styles.itineraryPreviewTitle}>
+                        Itinerary Preview:
+                      </Text>
                       <Text style={styles.itineraryPreviewText}>
-                        {blog.trip.itinerary.length} day{blog.trip.itinerary.length > 1 ? 's' : ''} planned
+                        {blog.trip.itinerary.length} day
+                        {blog.trip.itinerary.length > 1 ? "s" : ""} planned
                       </Text>
                       <Text style={styles.itineraryPreviewSubtext}>
                         Tap to see full itinerary details
@@ -740,7 +774,6 @@ const BlogDetailsScreen = () => {
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -766,15 +799,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  coverImage: { 
-    width: "100%", 
-    height: 300 
+  coverImage: {
+    width: "100%",
+    height: 300,
   },
-  scrollView: { 
-    marginTop: 0 
+  scrollView: {
+    marginTop: 0,
   },
-  content: { 
-    padding: 16 
+  content: {
+    padding: 16,
   },
   title: {
     fontSize: 26,
@@ -782,8 +815,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     color: "#333",
   },
-  sectionContainer: { 
-    marginBottom: 24 
+  sectionContainer: {
+    marginBottom: 24,
   },
   sectionHeader: {
     fontSize: 20,
@@ -829,11 +862,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 8,
   },
-  starSubmissionContainer: { 
-    flexDirection: "row" 
+  starSubmissionContainer: {
+    flexDirection: "row",
   },
-  starIcon: { 
-    marginHorizontal: 4 
+  starIcon: {
+    marginHorizontal: 4,
   },
   description: {
     fontSize: 16,
@@ -850,55 +883,55 @@ const styles = StyleSheet.create({
     color: "#444",
     marginBottom: 16,
   },
-  tripDetails: { 
-    marginTop: 16 
+  tripDetails: {
+    marginTop: 16,
   },
   metadata: {
     flexDirection: "row",
     justifyContent: "space-around",
     marginBottom: 16,
   },
-  metadataItem: { 
-    alignItems: "center" 
+  metadataItem: {
+    alignItems: "center",
   },
   // Trip Card Container
   tripCardContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 12,
     padding: 16,
     marginVertical: 12,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
-    elevation: 4,  // Android shadow
+    elevation: 4, // Android shadow
   },
 
   // Trip Card Header
   tripCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 12,
   },
 
   tripCardTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
 
   // View Details Button
   viewDetailsButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
 
   viewDetailsText: {
-    color: '#6366F1',
+    color: "#6366F1",
     fontSize: 14,
-    fontWeight: '600',
-    marginRight: 4,  // Space between text and icon
+    fontWeight: "600",
+    marginRight: 4, // Space between text and icon
   },
 
   // Trip Card Content
@@ -908,22 +941,22 @@ const styles = StyleSheet.create({
 
   // Metadata Section
   metadata: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
     marginBottom: 12,
   },
 
   metadataItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: 8,
     flex: 1,
   },
 
   metadataText: {
     fontSize: 14,
-    color: '#555',
+    color: "#555",
     marginLeft: 8,
   },
 
@@ -931,25 +964,25 @@ const styles = StyleSheet.create({
   itineraryPreview: {
     marginTop: 16,
     padding: 12,
-    backgroundColor: '#E8F0FE',
+    backgroundColor: "#E8F0FE",
     borderRadius: 8,
   },
 
   itineraryPreviewTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
 
   itineraryPreviewText: {
     fontSize: 14,
-    color: '#555',
+    color: "#555",
     marginTop: 4,
   },
 
   itineraryPreviewSubtext: {
     fontSize: 12,
-    color: '#777',
+    color: "#777",
     marginTop: 4,
   },
   dayCard: {
@@ -983,9 +1016,9 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     color: "#333",
   },
-  dayPreview: { 
-    fontSize: 14, 
-    color: "#666" 
+  dayPreview: {
+    fontSize: 14,
+    color: "#666",
   },
   dayDetails: {
     padding: 16,
@@ -1223,16 +1256,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 16,
   },
-  modalButton: { 
-    padding: 8 
+  modalButton: {
+    padding: 8,
   },
   modalButtonText: {
     fontSize: 16,
     color: "#4CAF50",
     fontWeight: "600",
   },
-  photoContainer: { 
-    marginRight: 12 
+  photoContainer: {
+    marginRight: 12,
   },
   photo: {
     width: 150,
@@ -1253,8 +1286,8 @@ const styles = StyleSheet.create({
     color: "#ccc",
     marginTop: 8,
   },
-  contactItem: { 
-    marginBottom: 12 
+  contactItem: {
+    marginBottom: 12,
   },
   contactLabel: {
     fontSize: 16,
@@ -1336,8 +1369,8 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     marginRight: 16,
   },
-  hostInfo: { 
-    flex: 1 
+  hostInfo: {
+    flex: 1,
   },
   hostName: {
     fontSize: 18,
@@ -1365,16 +1398,15 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   profilePicImage: {
-  width: 40, 
-  height: 40, 
-  borderRadius: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
   profilePicImageSmall: {
-    width: 30, 
-    height: 30, 
+    width: 30,
+    height: 30,
     borderRadius: 15,
   },
-
 });
 
 export default BlogDetailsScreen;

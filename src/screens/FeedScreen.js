@@ -12,38 +12,143 @@ import {
   StatusBar,
   SafeAreaView,
   RefreshControl,
-  Animated
+  Animated,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { getBlogPosts, searchBlogs } from "../lib/blogs";
 import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
-import BlogCard from '../components/BlogCard';
+import BlogCard from "../components/BlogCard";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.9;
 
 const TAGS = [
-  { id: '1', name: 'RoadTrip', icon: 'directions-car', iconLibrary: 'MaterialIcons' },
-  { id: '2', name: 'Trekking', icon: 'hiking', iconLibrary: 'MaterialCommunityIcons' },
-  { id: '3', name: 'Rafting', icon: 'kayaking', iconLibrary: 'MaterialCommunityIcons' },
-  { id: '4', name: 'Paragliding', icon: 'paragliding', iconLibrary: 'MaterialCommunityIcons' },
-  { id: '5', name: 'RiverCruise', icon: 'ferry', iconLibrary: 'MaterialCommunityIcons' },
-  { id: '6', name: 'ForestCamping', icon: 'campfire', iconLibrary: 'MaterialCommunityIcons' },
-  { id: '7', name: 'ShoppingSpree', icon: 'shopping-cart', iconLibrary: 'MaterialIcons' },
-  { id: '8', name: 'BeachTrip', icon: 'umbrella-beach', iconLibrary: 'MaterialCommunityIcons' },
-  { id: '9', name: 'PartyNight', icon: 'record-player', iconLibrary: 'MaterialCommunityIcons' },
-  { id: '10', name: 'FoodTrail', icon: 'silverware-fork-knife', iconLibrary: 'MaterialCommunityIcons' },
-  { id: '11', name: 'HeritageWalk', icon: 'city-variant', iconLibrary: 'MaterialCommunityIcons' },
-  { id: '12', name: 'CityTour', icon: 'location-city', iconLibrary: 'MaterialIcons' },
-  { id: '13', name: 'WaterfallVisit', icon: 'waterfall', iconLibrary: 'MaterialCommunityIcons' },
-  { id: '14', name: 'AdventureSports', icon: 'run-fast', iconLibrary: 'MaterialCommunityIcons' },
-  { id: '15', name: 'Backpacking', icon: 'bag-personal', iconLibrary: 'MaterialCommunityIcons' },
-  { id: '16', name: 'Camping', icon: 'tent', iconLibrary: 'MaterialCommunityIcons' },
-  { id: '17', name: 'NatureTrail', icon: 'tree', iconLibrary: 'MaterialCommunityIcons' },
-  { id: '18', name: 'StudyBreak', icon: 'school', iconLibrary: 'MaterialIcons' },
-  { id: '19', name: 'ReligiousTrip', icon: 'temple-hindu', iconLibrary: 'MaterialIcons' },
-  { id: '20', name: 'WildlifeSafari', icon: 'paw', iconLibrary: 'MaterialCommunityIcons' },
-  { id: '21', name: 'WeekendTrip', icon: 'calendar-weekend', iconLibrary: 'MaterialCommunityIcons' },
+  {
+    id: "1",
+    name: "RoadTrip",
+    icon: "directions-car",
+    iconLibrary: "MaterialIcons",
+  },
+  {
+    id: "2",
+    name: "Trekking",
+    icon: "hiking",
+    iconLibrary: "MaterialCommunityIcons",
+  },
+  {
+    id: "3",
+    name: "Rafting",
+    icon: "kayaking",
+    iconLibrary: "MaterialCommunityIcons",
+  },
+  {
+    id: "4",
+    name: "Paragliding",
+    icon: "paragliding",
+    iconLibrary: "MaterialCommunityIcons",
+  },
+  {
+    id: "5",
+    name: "RiverCruise",
+    icon: "ferry",
+    iconLibrary: "MaterialCommunityIcons",
+  },
+  {
+    id: "6",
+    name: "ForestCamping",
+    icon: "campfire",
+    iconLibrary: "MaterialCommunityIcons",
+  },
+  {
+    id: "7",
+    name: "ShoppingSpree",
+    icon: "shopping-cart",
+    iconLibrary: "MaterialIcons",
+  },
+  {
+    id: "8",
+    name: "BeachTrip",
+    icon: "umbrella-beach",
+    iconLibrary: "MaterialCommunityIcons",
+  },
+  {
+    id: "9",
+    name: "PartyNight",
+    icon: "record-player",
+    iconLibrary: "MaterialCommunityIcons",
+  },
+  {
+    id: "10",
+    name: "FoodTrail",
+    icon: "silverware-fork-knife",
+    iconLibrary: "MaterialCommunityIcons",
+  },
+  {
+    id: "11",
+    name: "HeritageWalk",
+    icon: "city-variant",
+    iconLibrary: "MaterialCommunityIcons",
+  },
+  {
+    id: "12",
+    name: "CityTour",
+    icon: "location-city",
+    iconLibrary: "MaterialIcons",
+  },
+  {
+    id: "13",
+    name: "WaterfallVisit",
+    icon: "waterfall",
+    iconLibrary: "MaterialCommunityIcons",
+  },
+  {
+    id: "14",
+    name: "AdventureSports",
+    icon: "run-fast",
+    iconLibrary: "MaterialCommunityIcons",
+  },
+  {
+    id: "15",
+    name: "Backpacking",
+    icon: "bag-personal",
+    iconLibrary: "MaterialCommunityIcons",
+  },
+  {
+    id: "16",
+    name: "Camping",
+    icon: "tent",
+    iconLibrary: "MaterialCommunityIcons",
+  },
+  {
+    id: "17",
+    name: "NatureTrail",
+    icon: "tree",
+    iconLibrary: "MaterialCommunityIcons",
+  },
+  {
+    id: "18",
+    name: "StudyBreak",
+    icon: "school",
+    iconLibrary: "MaterialIcons",
+  },
+  {
+    id: "19",
+    name: "ReligiousTrip",
+    icon: "temple-hindu",
+    iconLibrary: "MaterialIcons",
+  },
+  {
+    id: "20",
+    name: "WildlifeSafari",
+    icon: "paw",
+    iconLibrary: "MaterialCommunityIcons",
+  },
+  {
+    id: "21",
+    name: "WeekendTrip",
+    icon: "calendar-weekend",
+    iconLibrary: "MaterialCommunityIcons",
+  },
 ];
 
 const formatDate = (dateString) => {
@@ -53,27 +158,42 @@ const formatDate = (dateString) => {
   const diffDays = diffMs / (1000 * 60 * 60 * 24);
   if (diffDays < 7) {
     const daysRounded = Math.floor(diffDays);
-    return daysRounded <= 0
-      ? <Text>Today</Text>
-      : <Text>{`${daysRounded} day${daysRounded > 1 ? "s" : ""} ago`}</Text>;
+    return daysRounded <= 0 ? (
+      <Text>Today</Text>
+    ) : (
+      <Text>{`${daysRounded} day${daysRounded > 1 ? "s" : ""} ago`}</Text>
+    );
   }
-  return <Text>{date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric", 
-    year: "numeric",
-  })}</Text>;
+  return (
+    <Text>
+      {date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })}
+    </Text>
+  );
 };
 
 const FeedScreen = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
-  const navigation = useNavigation();
   const searchInputRef = useRef(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (route.params?.searchQuery) {
+      setSearchQuery(route.params.searchQuery);
+      setSelectedTags([]);
+      handleSearch(route.params.searchQuery, []);
+    }
+  }, [route.params]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -104,16 +224,16 @@ const FeedScreen = () => {
   };
 
   const handleTagPress = (tagName) => {
-    setSelectedTags(prev => {
+    setSelectedTags((prev) => {
       if (prev.includes(tagName)) {
-        return prev.filter(tag => tag !== tagName);
+        return prev.filter((tag) => tag !== tagName);
       }
       return [...prev, tagName];
     });
   };
 
   const handleClearSearch = () => {
-    setSearchQuery('');
+    setSearchQuery("");
     if (selectedTags.length === 0) {
       fetchBlogs();
     } else {
@@ -133,18 +253,18 @@ const FeedScreen = () => {
     handleSearch();
   };
 
-  const handleSearch = async () => {
+  const handleSearch = async (query = searchQuery, tags = selectedTags) => {
     setLoading(true);
     try {
       const searchParams = {
-        query: searchQuery,
-        tags: selectedTags
+        query: query,
+        tags: tags,
       };
-      
+
       const searchResults = await searchBlogs(searchParams);
       setBlogs(searchResults);
     } catch (error) {
-      console.error('Search error:', error);
+      console.error("Search error:", error);
       setBlogs([]);
     } finally {
       setLoading(false);
@@ -175,15 +295,17 @@ const FeedScreen = () => {
     <BlogCard
       blog={item}
       style={styles.card}
-      onPress={() => navigation.navigate("BlogDetailsScreen", { blogId: item._id })}
+      onPress={() =>
+        navigation.navigate("BlogDetailsScreen", { blogId: item._id })
+      }
     />
   );
 
   const getIconComponent = (library) => {
     switch (library) {
-      case 'MaterialIcons':
+      case "MaterialIcons":
         return MaterialIcons;
-      case 'MaterialCommunityIcons':
+      case "MaterialCommunityIcons":
         return MaterialCommunityIcons;
       default:
         return MaterialIcons;
@@ -197,19 +319,19 @@ const FeedScreen = () => {
       <TouchableOpacity
         style={[
           styles.tagButton,
-          selectedTags.includes(item.name) && styles.tagButtonSelected
+          selectedTags.includes(item.name) && styles.tagButtonSelected,
         ]}
         onPress={() => handleTagPress(item.name)}
       >
         <IconComponent
           name={item.icon}
           size={16}
-          color={selectedTags.includes(item.name) ? '#FFF' : '#666'}
+          color={selectedTags.includes(item.name) ? "#FFF" : "#666"}
         />
         <Text
           style={[
             styles.tagText,
-            selectedTags.includes(item.name) && styles.tagTextSelected
+            selectedTags.includes(item.name) && styles.tagTextSelected,
           ]}
         >
           {item.name}
@@ -229,7 +351,7 @@ const FeedScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#388E3C" />
-      
+
       {/* Header */}
       <View style={styles.feedHeader}>
         <View style={styles.headerContent}>
@@ -241,7 +363,12 @@ const FeedScreen = () => {
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
-          <MaterialIcons name="search" size={20} color="#757575" style={styles.searchIcon} />
+          <MaterialIcons
+            name="search"
+            size={20}
+            color="#757575"
+            style={styles.searchIcon}
+          />
           <TextInput
             ref={searchInputRef}
             style={styles.textInput}
@@ -252,14 +379,17 @@ const FeedScreen = () => {
             placeholder="Search trips and experiences..."
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={handleClearSearch} style={styles.clearButton}>
+            <TouchableOpacity
+              onPress={handleClearSearch}
+              style={styles.clearButton}
+            >
               <MaterialIcons name="close" size={20} color="#757575" />
             </TouchableOpacity>
           )}
         </View>
 
         <View style={styles.filtersContainer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.filterButton}
             onPress={() => setFilterModalVisible(true)}
           >
@@ -268,13 +398,12 @@ const FeedScreen = () => {
           </TouchableOpacity>
 
           {selectedTags.length > 0 && (
-            <Animated.View 
-              style={[
-                styles.selectedCount, 
-                { opacity: fadeAnim }
-              ]}
+            <Animated.View
+              style={[styles.selectedCount, { opacity: fadeAnim }]}
             >
-              <Text style={styles.selectedCountText}>{selectedTags.length}</Text>
+              <Text style={styles.selectedCountText}>
+                {selectedTags.length}
+              </Text>
             </Animated.View>
           )}
         </View>
@@ -294,7 +423,7 @@ const FeedScreen = () => {
             horizontal
             showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.selectedTag}
                 onPress={() => handleTagPress(item)}
               >
@@ -333,10 +462,10 @@ const FeedScreen = () => {
               {loading ? "Loading..." : "No posts found"}
             </Text>
             {(searchQuery.length > 0 || selectedTags.length > 0) && (
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.resetButton}
                 onPress={() => {
-                  setSearchQuery('');
+                  setSearchQuery("");
                   setSelectedTags([]);
                   fetchBlogs();
                 }}
@@ -367,20 +496,20 @@ const FeedScreen = () => {
             <FlatList
               data={TAGS}
               renderItem={renderTagItem}
-              keyExtractor={item => item.id}
+              keyExtractor={(item) => item.id}
               numColumns={2}
               contentContainerStyle={styles.modalTagsContainer}
             />
 
             <View style={styles.modalFooter}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.clearFiltersButton}
                 onPress={handleClearAllTags}
               >
                 <Text style={styles.clearFiltersText}>Clear All</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 style={styles.applyFiltersButton}
                 onPress={handleApplyFilters}
               >
@@ -429,17 +558,17 @@ const styles = StyleSheet.create({
   searchContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
   searchInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 10,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: "#f9f9f9",
     paddingHorizontal: 10,
     height: 46,
   },
@@ -455,65 +584,65 @@ const styles = StyleSheet.create({
     padding: 6,
   },
   filtersContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 12,
-    alignItems: 'center',
+    alignItems: "center",
   },
   filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 6,
   },
   filterButtonText: {
     marginLeft: 6,
-    color: '#4CAF50',
-    fontWeight: '600',
+    color: "#4CAF50",
+    fontWeight: "600",
     fontSize: 14,
   },
   selectedCount: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: "#4CAF50",
     borderRadius: 12,
     minWidth: 24,
     height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginLeft: 8,
   },
   selectedCountText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
     fontSize: 12,
   },
   selectedTagsContainer: {
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
   selectedTagsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
   selectedTagsTitle: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
   clearAllText: {
     fontSize: 14,
-    color: '#E53935',
-    fontWeight: '500',
+    color: "#E53935",
+    fontWeight: "500",
   },
   selectedTagsList: {
     paddingVertical: 4,
   },
   selectedTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#4CAF50',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#4CAF50",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
@@ -521,7 +650,7 @@ const styles = StyleSheet.create({
   },
   selectedTagText: {
     fontSize: 14,
-    color: '#fff',
+    color: "#fff",
     marginRight: 6,
   },
   listContainer: {
@@ -543,41 +672,41 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   resetButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: "#4CAF50",
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 6,
   },
   resetButtonText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: "#fff",
+    fontWeight: "600",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
   },
   modalContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingTop: 20,
     paddingBottom: 30,
-    maxHeight: '80%',
+    maxHeight: "80%",
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingBottom: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   modalTagsContainer: {
     paddingHorizontal: 12,
@@ -585,9 +714,9 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   tagButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F5F5F5',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F5F5F5",
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 20,
@@ -595,52 +724,52 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: width / 2 - 40,
     maxWidth: width / 2 - 40,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   tagButtonSelected: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: "#4CAF50",
   },
   tagText: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginLeft: 6,
   },
   tagTextSelected: {
-    color: '#FFF',
+    color: "#FFF",
   },
   modalFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopColor: "#eee",
   },
   clearFiltersButton: {
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     marginRight: 12,
   },
   clearFiltersText: {
     fontSize: 16,
-    color: '#666',
-    fontWeight: '500',
+    color: "#666",
+    fontWeight: "500",
   },
   applyFiltersButton: {
     flex: 1,
-    backgroundColor: '#4CAF50',
+    backgroundColor: "#4CAF50",
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   applyFiltersText: {
     fontSize: 16,
-    color: '#fff',
-    fontWeight: '600',
+    color: "#fff",
+    fontWeight: "600",
   },
 });
 
