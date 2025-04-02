@@ -13,14 +13,22 @@ import {
   SafeAreaView,
   RefreshControl,
   Animated,
+  ImageBackground,
+  Platform,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { getBlogPosts, searchBlogs } from "../lib/blogs";
-import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  MaterialIcons,
+  MaterialCommunityIcons,
+  Feather,
+} from "@expo/vector-icons";
 import BlogCard from "../components/BlogCard";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.9;
+const HERO_MAX_HEIGHT = 220;
+const HERO_MIN_HEIGHT = 100;
 
 const TAGS = [
   {
@@ -210,6 +218,43 @@ const FeedScreen = () => {
     }
   };
 
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const heroHeight = scrollY.interpolate({
+    inputRange: [0, HERO_MAX_HEIGHT - HERO_MIN_HEIGHT],
+    outputRange: [HERO_MAX_HEIGHT, HERO_MIN_HEIGHT],
+    extrapolate: "clamp",
+  });
+
+  const headerTranslateY = scrollY.interpolate({
+    inputRange: [0, HERO_MAX_HEIGHT - HERO_MIN_HEIGHT],
+    outputRange: [0, -20],
+    extrapolate: "clamp",
+  });
+
+  const headerScale = scrollY.interpolate({
+    inputRange: [0, HERO_MAX_HEIGHT - HERO_MIN_HEIGHT],
+    outputRange: [1, 0.9],
+    extrapolate: "clamp",
+  });
+
+  const welcomeTextSize = scrollY.interpolate({
+    inputRange: [0, HERO_MAX_HEIGHT - HERO_MIN_HEIGHT],
+    outputRange: [24, 18],
+    extrapolate: "clamp",
+  });
+
+  const subTextOpacity = scrollY.interpolate({
+    inputRange: [0, (HERO_MAX_HEIGHT - HERO_MIN_HEIGHT) * 0.3],
+    outputRange: [1, 0],
+    extrapolate: "clamp",
+  });
+
+  const heroContentOpacity = scrollY.interpolate({
+    inputRange: [0, (HERO_MAX_HEIGHT - HERO_MIN_HEIGHT) * 0.5],
+    outputRange: [1, 0],
+    extrapolate: "clamp",
+  });
+
   const fetchBlogs = async () => {
     setLoading(true);
     try {
@@ -314,80 +359,126 @@ const FeedScreen = () => {
 
   const renderTagItem = ({ item }) => {
     const IconComponent = getIconComponent(item.iconLibrary);
-
-    return (
-      <TouchableOpacity
-        style={[
-          styles.tagButton,
-          selectedTags.includes(item.name) && styles.tagButtonSelected,
-        ]}
-        onPress={() => handleTagPress(item.name)}
-      >
-        <IconComponent
-          name={item.icon}
-          size={16}
-          color={selectedTags.includes(item.name) ? "#FFF" : "#666"}
-        />
-        <Text
-          style={[
-            styles.tagText,
-            selectedTags.includes(item.name) && styles.tagTextSelected,
-          ]}
-        >
-          {item.name}
-        </Text>
-      </TouchableOpacity>
-    );
   };
-
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.centered}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#388E3C" />
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        barStyle="light-content"
+      />
 
-      {/* Header */}
-      <View style={styles.feedHeader}>
-        <View style={styles.headerContent}>
-          <Text style={styles.feedHeaderText}>Discover</Text>
-          <Text style={styles.feedSubheaderText}>Travel Stories</Text>
-        </View>
-      </View>
-
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <View style={styles.searchInputContainer}>
-          <MaterialIcons
-            name="search"
-            size={20}
-            color="#757575"
-            style={styles.searchIcon}
-          />
-          <TextInput
-            ref={searchInputRef}
-            style={styles.textInput}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onSubmitEditing={handleSearch}
-            returnKeyType="search"
-            placeholder="Search trips and experiences..."
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity
-              onPress={handleClearSearch}
-              style={styles.clearButton}
+      {/* Hero Section */}
+      <Animated.View style={[styles.heroContainer, { height: heroHeight }]}>
+        <Animated.View style={styles.heroBackgroundContainer}>
+          <ImageBackground
+            source={{
+              uri: "https://images.unsplash.com/photo-1521336575822-6da63fb45455"
+,
+            }}
+            style={styles.heroBackground}
+          >
+            <Animated.View
+              style={[
+                styles.gradient,
+                {
+                  backgroundColor: scrollY.interpolate({
+                    inputRange: [0, HERO_MAX_HEIGHT - HERO_MIN_HEIGHT],
+                    outputRange: ["rgba(0,0,0,0.1)", "rgba(0,0,0,0.4)"],
+                    extrapolate: "clamp",
+                  }),
+                },
+              ]}
             >
-              <MaterialIcons name="close" size={20} color="#757575" />
-            </TouchableOpacity>
-          )}
-        </View>
+              <Animated.View
+                style={[
+                  styles.headerContent,
+                  {
+                    transform: [
+                      { translateY: headerTranslateY },
+                      { scale: headerScale },
+                    ],
+                  },
+                ]}
+              >
+                <View style={styles.headerRow}>
+                  <View style={styles.welcomeSection}>
+                    <Animated.Text
+                      style={[
+                        styles.welcomeText,
+                        { fontSize: welcomeTextSize },
+                      ]}
+                    >
+                      Discover
+                    </Animated.Text>
+                    <Animated.Text
+                      style={[styles.subText, { opacity: subTextOpacity }]}
+                    >
+                      Travel Stories
+                    </Animated.Text>
+                  </View>
+                </View>
+              </Animated.View>
 
+              <Animated.View
+                style={[styles.heroContent, { opacity: heroContentOpacity }]}
+              >
+                <View style={styles.searchContainer}>
+                  <View style={styles.searchInputContainer}>
+                    <MaterialIcons
+                      name="search"
+                      size={20}
+                      color="#757575"
+                      style={styles.searchIcon}
+                    />
+                    <TextInput
+                      ref={searchInputRef}
+                      style={styles.textInput}
+                      value={searchQuery}
+                      onChangeText={setSearchQuery}
+                      onSubmitEditing={handleSearch}
+                      returnKeyType="search"
+                      placeholder="Search trips and experiences..."
+                    />
+                    {searchQuery.length > 0 && (
+                      <TouchableOpacity
+                        onPress={handleClearSearch}
+                        style={styles.clearButton}
+                      >
+                        <MaterialIcons name="close" size={20} color="#757575" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              </Animated.View>
+            </Animated.View>
+          </ImageBackground>
+        </Animated.View>
+      </Animated.View>
+
+      {/* Main Content */}
+      <Animated.ScrollView
+        style={{ marginTop: HERO_MIN_HEIGHT }}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+        scrollEventThrottle={16}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#4CAF50"]}
+            tintColor="#4CAF50"
+          />
+        }
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: HERO_MAX_HEIGHT - HERO_MIN_HEIGHT + 16 },
+        ]}
+      >
+        {/* Filters */}
         <View style={styles.filtersContainer}>
           <TouchableOpacity
             style={styles.filterButton}
@@ -407,77 +498,70 @@ const FeedScreen = () => {
             </Animated.View>
           )}
         </View>
-      </View>
 
-      {/* Selected Tags Display */}
-      {selectedTags.length > 0 && (
-        <View style={styles.selectedTagsContainer}>
-          <View style={styles.selectedTagsHeader}>
-            <Text style={styles.selectedTagsTitle}>Selected Tags:</Text>
-            <TouchableOpacity onPress={handleClearAllTags}>
-              <Text style={styles.clearAllText}>Clear All</Text>
-            </TouchableOpacity>
-          </View>
-          <FlatList
-            data={selectedTags}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.selectedTag}
-                onPress={() => handleTagPress(item)}
-              >
-                <Text style={styles.selectedTagText}>{item}</Text>
-                <MaterialIcons name="close" size={16} color="#fff" />
+        {/* Selected Tags Display */}
+        {selectedTags.length > 0 && (
+          <View style={styles.selectedTagsContainer}>
+            <View style={styles.selectedTagsHeader}>
+              <Text style={styles.selectedTagsTitle}>Selected Tags:</Text>
+              <TouchableOpacity onPress={handleClearAllTags}>
+                <Text style={styles.clearAllText}>Clear All</Text>
               </TouchableOpacity>
-            )}
-            keyExtractor={(item) => item}
-            contentContainerStyle={styles.selectedTagsList}
-          />
-        </View>
-      )}
-
-      {/* Feed List */}
-      <FlatList
-        data={blogs}
-        keyExtractor={(item) => item._id}
-        renderItem={renderBlogCard}
-        contentContainerStyle={styles.listContainer}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={["#4CAF50"]}
-            tintColor="#4CAF50"
-          />
-        }
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <MaterialIcons
-              name="sentiment-dissatisfied"
-              size={48}
-              color="#BDBDBD"
+            </View>
+            <FlatList
+              data={selectedTags}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.selectedTag}
+                  onPress={() => handleTagPress(item)}
+                >
+                  <Text style={styles.selectedTagText}>{item}</Text>
+                  <MaterialIcons name="close" size={16} color="#fff" />
+                </TouchableOpacity>
+              )}
+              keyExtractor={(item) => item}
+              contentContainerStyle={styles.selectedTagsList}
             />
-            <Text style={styles.emptyText}>
-              {loading ? "Loading..." : "No posts found"}
-            </Text>
-            {(searchQuery.length > 0 || selectedTags.length > 0) && (
-              <TouchableOpacity
-                style={styles.resetButton}
-                onPress={() => {
-                  setSearchQuery("");
-                  setSelectedTags([]);
-                  fetchBlogs();
-                }}
-              >
-                <Text style={styles.resetButtonText}>Reset Search</Text>
-              </TouchableOpacity>
-            )}
           </View>
-        }
-      />
+        )}
 
-      {/* Filter Modal */}
+        {/* Blog List */}
+        <FlatList
+          data={blogs}
+          keyExtractor={(item) => item._id}
+          renderItem={renderBlogCard}
+          contentContainerStyle={styles.listContainer}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <MaterialIcons
+                name="sentiment-dissatisfied"
+                size={48}
+                color="#BDBDBD"
+              />
+              <Text style={styles.emptyText}>
+                {loading ? "Loading..." : "No posts found"}
+              </Text>
+              {(searchQuery.length > 0 || selectedTags.length > 0) && (
+                <TouchableOpacity
+                  style={styles.resetButton}
+                  onPress={() => {
+                    setSearchQuery("");
+                    setSelectedTags([]);
+                    fetchBlogs();
+                  }}
+                >
+                  <Text style={styles.resetButtonText}>Reset Search</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          }
+          scrollEnabled={false}
+        />
+      </Animated.ScrollView>
+
+      {/* Filter Modal - Keep the existing modal code */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -528,39 +612,69 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f5f5f5",
   },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+  heroContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    overflow: "hidden",
   },
-  feedHeader: {
-    paddingVertical: 20,
-    paddingHorizontal: 16,
-    flexDirection: "row",
+  heroBackgroundContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  heroBackground: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  gradient: {
+    flex: 1,
     justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#4CAF50",
-    elevation: 4,
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 10 : 10,
   },
   headerContent: {
-    flexDirection: "column",
+    padding: 16,
+    zIndex: 20,
   },
-  feedHeaderText: {
+  heroContent: {
+    padding: 16,
+    paddingBottom: 24,
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  welcomeSection: {
+    flex: 1,
+  },
+  welcomeText: {
+    fontWeight: "700",
     color: "#fff",
-    fontSize: 28,
-    fontWeight: "bold",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   },
-  feedSubheaderText: {
-    color: "rgba(255,255,255,0.9)",
+  subText: {
     fontSize: 16,
-    marginTop: 2,
+    color: "#fff",
+    marginTop: 4,
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+  },
+  scrollContent: {
+    paddingBottom: 80,
   },
   searchContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+    backgroundColor: "transparent",
   },
   searchInputContainer: {
     flexDirection: "row",
@@ -586,6 +700,7 @@ const styles = StyleSheet.create({
   filtersContainer: {
     flexDirection: "row",
     marginTop: 12,
+    marginHorizontal: 16,
     alignItems: "center",
   },
   filterButton: {
@@ -655,7 +770,6 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 16,
-    paddingBottom: 60,
   },
   card: {
     marginBottom: 16,
