@@ -298,16 +298,17 @@ const FeedScreen = () => {
     handleSearch();
   };
 
-  const handleSearch = async (query = searchQuery, tags = selectedTags) => {
+  const handleSearch = async () => {
     setLoading(true);
     try {
       const searchParams = {
-        query: query,
-        tags: tags,
+        query: searchQuery,
+        tags: selectedTags,
       };
 
       const searchResults = await searchBlogs(searchParams);
-      setBlogs(searchResults);
+
+      setBlogs(Array.isArray(searchResults) ? searchResults : []);
     } catch (error) {
       console.error("Search error:", error);
       setBlogs([]);
@@ -359,6 +360,29 @@ const FeedScreen = () => {
 
   const renderTagItem = ({ item }) => {
     const IconComponent = getIconComponent(item.iconLibrary);
+    return (
+      <TouchableOpacity
+        style={[
+          styles.tagButton,
+          selectedTags.includes(item.name) && styles.tagButtonSelected,
+        ]}
+        onPress={() => handleTagPress(item.name)}
+      >
+        <IconComponent
+          name={item.icon}
+          size={16}
+          color={selectedTags.includes(item.name) ? "#FFF" : "#666"}
+        />
+        <Text
+          style={[
+            styles.tagText,
+            selectedTags.includes(item.name) && styles.tagTextSelected,
+          ]}
+        >
+          {item.name}
+        </Text>
+      </TouchableOpacity>
+    );
   };
 
   return (
@@ -374,8 +398,7 @@ const FeedScreen = () => {
         <Animated.View style={styles.heroBackgroundContainer}>
           <ImageBackground
             source={{
-              uri: "https://images.unsplash.com/photo-1521336575822-6da63fb45455"
-,
+              uri: "https://images.unsplash.com/photo-1521336575822-6da63fb45455",
             }}
             style={styles.heroBackground}
           >

@@ -319,7 +319,10 @@ const BlogDetailsScreen = () => {
           {/* Title */}
           <View style={styles.sectionContainer}>
             <Text style={styles.title}>{blog.title}</Text>
-            {blog.host && (
+          </View>
+
+          {blog.host && (
+            <View style={[styles.sectionContainer, styles.hostCardWrapper]}>
               <View style={styles.hostCard}>
                 <Text style={styles.sectionTitle}>
                   <MaterialIcons name="person" size={24} color="#6366F1" />
@@ -342,8 +345,8 @@ const BlogDetailsScreen = () => {
                   </View>
                 </View>
               </View>
-            )}
-          </View>
+            </View>
+          )}
 
           {/* Summary Section */}
           {blog.summary && (
@@ -1382,6 +1385,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#6B7280",
     marginBottom: 12,
+  },
+  hostCardWrapper: {
+    marginTop: 230,
+    zIndex: 1,
   },
   contactButton: {
     backgroundColor: "#6366F1",

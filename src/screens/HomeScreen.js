@@ -280,33 +280,43 @@ const HomeScreen = () => {
                   </View>
                 </View>
               </Animated.View>
-
-              <Animated.View
-                style={[styles.heroContent, { opacity: heroContentOpacity }]}
-              >
-                <TouchableOpacity
-                  style={styles.inspirationContainer}
-                  onPress={() => navigation.navigate("Feed")}
-                >
-                  <View style={styles.inspirationCard}>
-                    <Feather
-                      name="compass"
-                      size={20}
-                      color="#4CAF50"
-                      style={styles.inspirationIcon}
-                    />
-                    <Text style={styles.inspirationText}>
-                      {randomInspiration}
-                    </Text>
-                    <View style={styles.arrowContainer}>
-                      <Feather name="arrow-right" size={20} color="#4CAF50" />
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              </Animated.View>
             </Animated.View>
           </ImageBackground>
         </Animated.View>
+      </Animated.View>
+
+      <Animated.View
+        style={[
+          styles.inspirationContainerAbsolute,
+          {
+            opacity: heroContentOpacity,
+            transform: [
+              {
+                translateY: scrollY.interpolate({
+                  inputRange: [0, HERO_MAX_HEIGHT - HERO_MIN_HEIGHT],
+                  outputRange: [HERO_MAX_HEIGHT - 30, HERO_MIN_HEIGHT - 30],
+                  extrapolate: "clamp",
+                }),
+              },
+            ],
+          },
+        ]}
+      >
+        <TouchableOpacity
+          style={styles.inspirationCard}
+          onPress={() => navigation.navigate("Feed")}
+        >
+          <Feather
+            name="compass"
+            size={20}
+            color="#4CAF50"
+            style={styles.inspirationIcon}
+          />
+          <Text style={styles.inspirationText}>{randomInspiration}</Text>
+          <View style={styles.arrowContainer}>
+            <Feather name="arrow-right" size={20} color="#4CAF50" />
+          </View>
+        </TouchableOpacity>
       </Animated.View>
 
       <Animated.ScrollView
@@ -322,7 +332,7 @@ const HomeScreen = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingTop: HERO_MAX_HEIGHT - HERO_MIN_HEIGHT + 16 },
+          { paddingTop: HERO_MAX_HEIGHT - HERO_MIN_HEIGHT + 60 }, // Added extra padding for inspiration box
         ]}
       >
         {/* Trending Blogs Section */}
@@ -444,14 +454,6 @@ const HomeScreen = () => {
           </View>
         </View>
       </Animated.ScrollView>
-
-      {/* Floating Action Button */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate("CreateTrip")}
-      >
-        <Feather name="plus" size={24} color="#fff" />
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -489,10 +491,6 @@ const styles = StyleSheet.create({
   headerContent: {
     padding: 16,
     zIndex: 20,
-  },
-  heroContent: {
-    padding: 16,
-    paddingBottom: 24,
   },
   headerRow: {
     flexDirection: "row",
@@ -547,9 +545,12 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "bold",
   },
-  inspirationContainer: {
-    marginTop: 5,
-    marginBottom: 10,
+  // New position for inspiration box
+  inspirationContainerAbsolute: {
+    position: "absolute",
+    left: 16,
+    right: 16,
+    zIndex: 15,
   },
   inspirationCard: {
     backgroundColor: "rgba(255, 255, 255, 0.95)",
@@ -616,7 +617,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginRight: 2,
   },
-  // Rest of the styles remain the same
   blogsContainer: {
     paddingLeft: 16,
     paddingRight: 8,
