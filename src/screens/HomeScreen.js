@@ -443,8 +443,7 @@ const HomeScreen = () => {
                     source={{ uri: destination.image }}
                     style={styles.destinationImage}
                   />
-                  <LinearGradient
-                    colors={["transparent", "rgba(0,0,0,0.7)"]}
+                  <View
                     style={styles.destinationGradient}
                   />
                   <Text style={styles.destinationName}>{destination.name}</Text>

@@ -211,17 +211,12 @@ const ProfileScreen = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#1E7033" />
 
-      <LinearGradient
-        colors={["#1E7033", "#4CAF50"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.header}
-      >
+      <View style={styles.header}>
         <Text style={styles.headerTitle}>My Profile</Text>
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Feather name="log-out" size={24} color="#FF5252" />
         </TouchableOpacity>
-      </LinearGradient>
+      </View>
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -348,7 +343,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight || 30 : 30,
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 20 || 60 : 60,
     paddingBottom: 16,
     backgroundColor: "#4CAF50",
     ...Platform.select({

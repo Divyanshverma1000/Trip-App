@@ -101,8 +101,7 @@ const MyBlogsScreen = () => {
           source={{ uri: item.coverPhoto || 'https://via.placeholder.com/150' }}
           style={styles.blogImage}
         />
-        <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.7)']}
+        <View
           style={styles.gradient}
         />
         <TouchableOpacity
@@ -131,10 +130,7 @@ const MyBlogsScreen = () => {
     <View style={styles.container}>
       <StatusBar backgroundColor="#1E7033" barStyle="light-content" />
       
-      <LinearGradient
-        colors={['#1E7033', '#4CAF50']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
+      <View
         style={styles.header}
       >
         <Text style={styles.headerTitle}>My Blogs</Text>
@@ -144,7 +140,7 @@ const MyBlogsScreen = () => {
         >
           <Feather name="plus" size={24} color="#fff" />
         </TouchableOpacity>
-      </LinearGradient>
+      </View>
       
       {loading && !refreshing ? (
         <View style={styles.loadingContainer}>
@@ -190,7 +186,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8f8',
   },
   header: {
-    paddingTop: 30,
+    paddingTop: 60,
     paddingBottom: 16,
     paddingHorizontal: 20,
     flexDirection: 'row',
@@ -201,6 +197,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
+    backgroundColor: '#4CAF50', // Add solid background color
   },
   headerTitle: {
     fontSize: 24,
@@ -253,6 +250,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 40,
+    backgroundColor: 'rgba(0,0,0,0.5)', // Add solid background color with opacity
   },
   blogInfo: {
     padding: 12,

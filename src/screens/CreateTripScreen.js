@@ -8,7 +8,9 @@ import {
   StyleSheet,
   ActivityIndicator,
   Image,
-  Switch
+  Switch,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { createTrip } from '../lib/trips';
@@ -273,7 +275,7 @@ const CreateTripScreen = ({ navigation, route }) => {
           />
         </View>
 
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <Text style={styles.sectionTitle}>Budget Information</Text>
           
           <Text style={styles.label}>Estimated Budget</Text>
@@ -285,15 +287,15 @@ const CreateTripScreen = ({ navigation, route }) => {
             keyboardType="numeric"
           />
 
-          {/* <Text style={styles.label}>Actual Budget (if known)</Text>
+          <Text style={styles.label}>Actual Budget (if known)</Text>
           <TextInput
             style={styles.input}
             value={tripData.actualBudget}
             onChangeText={(text) => setTripData(prev => ({ ...prev, actualBudget: text }))}
             placeholder="Enter actual budget (optional)"
             keyboardType="numeric"
-          /> */}
-        </View>
+          />
+        </View> */}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Packing Essentials</Text>
@@ -425,18 +427,31 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFF',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEE',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginLeft: 16,
-  },
+   header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 16,
+      paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 20 || 60 : 60,
+      paddingBottom: 16,
+      backgroundColor: "#4CAF50",
+      ...Platform.select({
+        android: {
+          elevation: 4,
+        },
+        ios: {
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+        },
+      }),
+    },
+    headerTitle: {
+      fontSize: 24,
+      fontWeight: "bold",
+      color: "#fff",
+    },
   form: {
     padding: 16,
   },

@@ -372,7 +372,7 @@ const onScroll = useAnimatedScrollHandler({
               <View style={styles.detailItem}>
                 <FontAwesome5 name="money-bill-wave" size={20} color="#6366F1" />
                 <Text style={styles.detailLabel}>Budget</Text>
-                <Text style={styles.detailValue}>Rs {trip.estimatedBudget}</Text>
+                <Text style={styles.detailValue}>Rs {trip.metadata.cost}</Text>
               </View>
             </View>
           </View>

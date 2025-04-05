@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   SafeAreaView,
   StatusBar,
+  Platform
 } from "react-native";
 import Toast from "react-native-toast-message";
 import { Feather } from "@expo/vector-icons";
@@ -161,7 +162,7 @@ const NotificationsScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#f8f9fa" },
+  safeArea: { flex: 1, backgroundColor: "#f8f9fa", paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0, },
   container: { flex: 1, padding: 20, backgroundColor: "#f8f9fa" },
   headerRow: {
     flexDirection: "row",
